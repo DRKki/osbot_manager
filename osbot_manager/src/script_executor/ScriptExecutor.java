@@ -19,13 +19,16 @@ public class ScriptExecutor {
     public static void execute(final String osbotPath, final OSBotAccount osBotAccount, final Configuration configuration) throws ClientOutOfDateException, MissingWebWalkDataException, IncorrectLoginException {
 
         List<String> command = new ArrayList<>();
-        command.add("java");
-        command.add("-jar");
-        command.add(osbotPath);
+
+        if(System.getProperty("os.name").toLowerCase().contains("win")) {
+            Collections.addAll(command, "CMD", "/C");
+        } else {
+            Collections.addAll(command, "/bin/bash", "-c");
+        }
+
+        Collections.addAll(command, "java", "-jar", osbotPath);
         Collections.addAll(command, osBotAccount.toParameterString().split(" "));
         Collections.addAll(command, configuration.toParameterString().split(" "));
-
-        System.out.println(command);
 
         try {
 
