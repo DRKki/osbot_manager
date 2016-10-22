@@ -31,7 +31,7 @@ public final class LocalScriptLoader {
             for(final File file : jarFiles) {
 
                 URL url = file.toURI().toURL();
-                ClassLoader classLoader = new URLClassLoader(new URL[]{url, new URL("osbot.jar")});
+                ClassLoader classLoader = new URLClassLoader(new URL[]{url, new URL("file://osbot.jar")});
 
                 JarFile jarFile = new JarFile(file.getAbsolutePath());
                 Enumeration entries = jarFile.entries();
