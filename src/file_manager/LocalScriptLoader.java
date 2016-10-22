@@ -29,31 +29,42 @@ public final class LocalScriptLoader {
             if(jarFiles == null) return localScriptNames;
 
             for(final File file : jarFiles) {
-
                 URL url = file.toURI().toURL();
-                ClassLoader classLoader = new URLClassLoader(new URL[]{url, new URL("file://osbot.jar")});
-
+                ClassLoader classLoader = new URLClassLoader(new URL[]{ url });
                 JarFile jarFile = new JarFile(file.getAbsolutePath());
-                Enumeration entries = jarFile.entries();
-                while (entries.hasMoreElements()) {
-                    JarEntry entry = (JarEntry) entries.nextElement();
-                    String name = entry.getName();
-                    if (name.contains(".class")) {
-                        Class cls = classLoader.loadClass(name.replace('/', '.').replace(".class", ""));
-                        for (Annotation annotation : cls.getAnnotations()) {
-                            String annotationStr = annotation.toString();
-                            if (annotationStr.contains("ScriptManifest")) {
-                                localScriptNames.add(getScriptNameFromAnnotation(annotationStr));
-                                break;
-                            }
-                        }
-                    }
-                }
+                String scriptName = getScriptNameFromJar(jarFile, classLoader);
+                if(scriptName != null) localScriptNames.add(scriptName);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return localScriptNames;
+    }
+
+    private String getScriptNameFromJar(final JarFile jarFile, final ClassLoader classLoader) throws ClassNotFoundException {
+        Enumeration entries = jarFile.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry entry = (JarEntry) entries.nextElement();
+            String name = entry.getName();
+            if (name.contains(".class")) {
+                String scriptName = getScriptNameFromClass(classLoader, name);
+                if(scriptName != null) {
+                    return scriptName;
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getScriptNameFromClass(final ClassLoader classLoader, final String className) throws ClassNotFoundException {
+        Class cls = classLoader.loadClass(className.replace('/', '.').replace(".class", ""));
+        for (Annotation annotation : cls.getAnnotations()) {
+            String annotationStr = annotation.toString();
+            if (annotationStr.contains("ScriptManifest")) {
+                return getScriptNameFromAnnotation(annotationStr);
+            }
+        }
+        return null;
     }
 
     private String getScriptNameFromAnnotation(final String annotation) {
