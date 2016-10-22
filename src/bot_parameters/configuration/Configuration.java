@@ -6,6 +6,7 @@ import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
 
 import java.io.Serializable;
+import java.util.Random;
 
 public final class Configuration implements BotParameter, Serializable {
 
@@ -18,6 +19,9 @@ public final class Configuration implements BotParameter, Serializable {
     private Integer debugPort;
     private boolean lowCpuMode;
     private boolean lowResourceMode;
+    private WorldType worldType;
+    private Integer world;
+    private boolean randomizeWorld;
 
     public Configuration(final RunescapeAccount runescapeAccount, final Script script) {
         this.runescapeAccount = runescapeAccount;
@@ -54,6 +58,12 @@ public final class Configuration implements BotParameter, Serializable {
 
     public final boolean isLowCpuMode() { return lowCpuMode; }
 
+    public final WorldType getWorldType() { return worldType; }
+
+    public final Integer getWorld() { return world; }
+
+    public boolean isRandomizeWorld() { return randomizeWorld; }
+
     public final void setRunescapeAccount(final RunescapeAccount runescapeAccount) { this.runescapeAccount = runescapeAccount; }
 
     public final void setScript(final Script script) { this.script = script; }
@@ -82,6 +92,12 @@ public final class Configuration implements BotParameter, Serializable {
 
     public final void setLowResourceMode (final boolean lowResourceMode) { this.lowResourceMode = lowResourceMode; }
 
+    public final void setWorldType(final WorldType worldType) { this.worldType = worldType; }
+
+    public final void setWorld(final Integer world) { this.world = world; }
+
+    public final void setRandomizeWorld(final boolean randomizeWorld) { this.randomizeWorld = randomizeWorld; }
+
     @Override
     public final String toParameterString() {
         String parameterString = String.join(" ", runescapeAccount.toParameterString(), script.toParameterString());
@@ -94,6 +110,12 @@ public final class Configuration implements BotParameter, Serializable {
         else if (lowResourceMode) parameterString += " -allow lowresource";
         else if (lowCpuMode) parameterString += " -allow lowcpu";
 
+        int worldVal;
+        if (randomizeWorld) worldVal = worldType.worlds[new Random().nextInt(worldType.worlds.length)];
+        else worldVal = world;
+
+        if (world != null) parameterString += " -world " + worldVal;
+
         return parameterString;
     }
 
@@ -103,6 +125,12 @@ public final class Configuration implements BotParameter, Serializable {
         configText += runescapeAccount.toString();
         configText += " | ";
         configText += script.toString();
+
+        configText += " | " + worldType;
+
+        if (randomizeWorld) configText += " | Random World ";
+        else configText += " | World: " + world;
+
         if (proxy != null) configText += " | " + proxy.toString();
         if (memoryAllocation != null) configText += " | Memory: " + memoryAllocation;
         configText += " | Collect Data: " + collectData;

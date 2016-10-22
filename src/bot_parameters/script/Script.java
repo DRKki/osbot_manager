@@ -36,7 +36,7 @@ public final class Script implements BotParameter, Serializable {
 
     @Override
     public final String toParameterString() {
-        return String.format("-script %s:%s", scriptIdentifier, parameters);
+        return String.format("-script \"\\\"%s\\\":%s\"", scriptIdentifier, parameters);
     }
 
     @Override
