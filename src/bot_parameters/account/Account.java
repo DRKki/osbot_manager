@@ -1,36 +1,36 @@
 package bot_parameters.account;
 
+import javafx.beans.property.SimpleStringProperty;
+
 import java.io.Serializable;
 
-class Account implements Serializable {
+public class Account implements Serializable {
 
-    private String username, password;
+    private SimpleStringProperty username, password;
 
-    Account() {}
-
-    Account(final String username, final String password) {
-        this.username = username;
-        this.password = password;
+    public Account(final String username, final String password) {
+        this.username = new SimpleStringProperty(username);
+        this.password = new SimpleStringProperty(password);
     }
 
     public final String getUsername() {
-        return username;
+        return username.get();
     }
 
     public final void setUsername(String username) {
-        this.username = username;
+        this.username.set(username);
     }
 
     public final String getPassword() {
-        return password;
+        return password.get();
     }
 
     public final void setPassword(String password) {
-        this.password = password;
+        this.password.set(password);
     }
 
     @Override
     public final String toString() {
-        return "Username: " + getUsername();
+        return getUsername();
     }
 }

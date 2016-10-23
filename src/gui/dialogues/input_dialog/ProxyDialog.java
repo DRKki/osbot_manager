@@ -61,7 +61,7 @@ public final class ProxyDialog extends InputDialog<Proxy> {
             password.setText("");
             return;
         }
-        ip.setText(existingItem.getIP());
+        ip.setText(existingItem.getIpAddress());
         port.setText(String.valueOf(existingItem.getPort()));
         if(existingItem instanceof SecuredProxy) {
             SecuredProxy securedProxy = (SecuredProxy) existingItem;

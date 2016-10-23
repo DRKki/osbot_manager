@@ -1,40 +1,42 @@
 package bot_parameters.proxy;
 
 import bot_parameters.interfaces.BotParameter;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 
 import java.io.Serializable;
 
 public class Proxy implements BotParameter, Serializable {
 
-    private String ip;
-    private int port;
+    private SimpleStringProperty ipAddress;
+    private SimpleIntegerProperty port;
 
-    public Proxy(final String ip, final int port) {
-        this.ip = ip;
-        this.port = port;
+    public Proxy(final String ipAddress, final int port) {
+        this.ipAddress = new SimpleStringProperty(ipAddress);
+        this.port = new SimpleIntegerProperty(port);
     }
 
-    public final String getIP() {
-        return ip;
+    public final String getIpAddress() {
+        return ipAddress.get();
     }
 
     public final int getPort() {
-        return port;
+        return port.get();
     }
 
     public final void setIP(final String ip) {
-        this.ip = ip;
+        this.ipAddress.set(ip);
     }
 
-    public final void setPort(final int port) { this.port = port; }
+    public final void setPort(final int port) { this.port.set(port); }
 
     @Override
     public String toParameterString() {
-        return String.format("-bot_parameters.proxy %s:%d", ip, port);
+        return String.format("-bot_parameters.proxy %s:%d", ipAddress.get(), port.get());
     }
 
     @Override
     public String toString() {
-        return ip + ":" + port;
+        return ipAddress.get() + ":" + port.get();
     }
 }

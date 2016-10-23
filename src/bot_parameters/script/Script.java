@@ -1,47 +1,52 @@
 package bot_parameters.script;
 
 import bot_parameters.interfaces.BotParameter;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
 
 import java.io.Serializable;
 
 public final class Script implements BotParameter, Serializable {
 
-    private String scriptIdentifier;
-    private String parameters;
-    private boolean isLocal;
+    private SimpleStringProperty author;
+    private SimpleStringProperty scriptIdentifier;
+    private SimpleStringProperty parameters;
+    private SimpleBooleanProperty isLocal;
 
     public Script(final String scriptIdentifier, final String parameters, final boolean isLocal) {
-        this.scriptIdentifier = scriptIdentifier;
-        this.parameters = parameters;
-        this.isLocal = isLocal;
+        this.scriptIdentifier = new SimpleStringProperty(scriptIdentifier);
+        this.parameters = new SimpleStringProperty(parameters);
+        this.isLocal = new SimpleBooleanProperty(isLocal);
     }
 
     public final String getScriptIdentifier() {
-        return scriptIdentifier;
+        return scriptIdentifier.get();
     }
 
     public final String getParameters() {
-        return parameters;
+        return parameters.get();
     }
 
     public final void setScriptIdentifier(final String scriptIdentifier) {
-        this.scriptIdentifier = scriptIdentifier;
+        this.scriptIdentifier.set(scriptIdentifier);
     }
 
     public final void setParameters(final String parameters) {
-        this.parameters = parameters;
+        this.parameters.set(parameters);
     }
 
-    public final boolean isLocal() { return isLocal; }
+    public final boolean isLocal() { return isLocal.get(); }
+
+    public void setIsLocal(final boolean isLocal) { this.isLocal.set(isLocal); }
 
     @Override
     public final String toParameterString() {
-        return String.format("-script \"\\\"%s\\\":%s\"", scriptIdentifier, parameters);
+        if (isLocal.get()) return String.format("-script \"\\\"%s\\\":%s\"", scriptIdentifier.get(), parameters.get());
+        else return String.format("-script %s:%s", scriptIdentifier.get(), parameters.get());
     }
 
     @Override
     public final String toString() {
-        String location = isLocal ? "(Local) " : "(SDN) ";
-        return location + scriptIdentifier + " : " + parameters;
+        return scriptIdentifier.get();
     }
 }

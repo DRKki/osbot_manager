@@ -4,16 +4,13 @@ import bot_parameters.account.RunescapeAccount;
 import bot_parameters.configuration.Configuration;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
-import file_manager.LocalScriptLoader;
 import file_manager.PropertiesFileManager;
 import file_manager.SettingsFileManager;
 import gui.dialogues.input_dialog.ConfigurationDialog;
 import gui.dialogues.input_dialog.ProxyDialog;
 import gui.dialogues.input_dialog.RunescapeAccountDialog;
 import gui.dialogues.input_dialog.ScriptDialog;
-import gui.tabs.BotSettingsTab;
-import gui.tabs.ListTab;
-import gui.tabs.RunTab;
+import gui.tabs.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
@@ -29,17 +26,10 @@ public class ManagerPane extends BorderPane {
 
         BotSettingsTab botSettingsTab = new BotSettingsTab();
 
-        ListTab<Script> scriptTab = new ListTab<>("Scripts", "No scripts found.", new ScriptDialog());
-
-        LocalScriptLoader localScriptLoader = new LocalScriptLoader();
-        List<String> localScriptNames = localScriptLoader.getLocalScriptNames();
-        for(String scriptName : localScriptNames) {
-            scriptTab.getListView().getItems().add(new Script(scriptName, "none", true));
-        }
-
-        ListTab<RunescapeAccount> runescapeAccountTab = new ListTab<>("Runescape Accounts", "No accounts found.", new RunescapeAccountDialog());
-        ListTab<Proxy> proxyTab = new ListTab<>("Proxies", "No proxies found.", new ProxyDialog());
-        ListTab<Configuration> runTab = new RunTab("Configurations", "No configurations found.", new ConfigurationDialog(runescapeAccountTab.getListView().getItems(), scriptTab.getListView().getItems(), proxyTab.getListView().getItems()), botSettingsTab);
+        TableTab<RunescapeAccount> runescapeAccountTab = new RunescapeAccountTab();
+        TableTab<Script> scriptTab = new ScriptTab();
+        TableTab<Proxy> proxyTab = new ProxyTab();
+        TableTab<Configuration> runTab = new ConfigurationTab(runescapeAccountTab.getTableView().getItems(), scriptTab.getTableView().getItems(), proxyTab.getTableView().getItems(), botSettingsTab);
 
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -49,10 +39,10 @@ public class ManagerPane extends BorderPane {
         Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
             List<Serializable> objects = new ArrayList<>();
-            objects.addAll(runescapeAccountTab.getListView().getItems());
-            objects.addAll(proxyTab.getListView().getItems());
-            objects.addAll(scriptTab.getListView().getItems());
-            objects.addAll(runTab.getListView().getItems());
+            objects.addAll(runescapeAccountTab.getTableView().getItems());
+            objects.addAll(proxyTab.getTableView().getItems());
+            objects.addAll(scriptTab.getTableView().getItems());
+            objects.addAll(runTab.getTableView().getItems());
             SettingsFileManager.saveSettings(objects);
             PropertiesFileManager.setOSBotProperties(botSettingsTab.getBot().getOsbotPath(),
                     botSettingsTab.getOsBotAccount().getUsername(),
@@ -61,19 +51,19 @@ public class ManagerPane extends BorderPane {
 
         Button loadButton = new Button("Load");
         loadButton.setOnAction(event -> {
-            runescapeAccountTab.getListView().getItems().clear();
-            proxyTab.getListView().getItems().clear();
-            scriptTab.getListView().getItems().clear();
-            runTab.getListView().getItems().clear();
+            runescapeAccountTab.getTableView().getItems().clear();
+            proxyTab.getTableView().getItems().clear();
+            scriptTab.getTableView().getItems().clear();
+            runTab.getTableView().getItems().clear();
             for (final Object object : SettingsFileManager.loadSettings()) {
                 if (object instanceof RunescapeAccount) {
-                    runescapeAccountTab.getListView().getItems().add((RunescapeAccount) object);
+                    runescapeAccountTab.getTableView().getItems().add((RunescapeAccount) object);
                 } else if (object instanceof Proxy) {
-                    proxyTab.getListView().getItems().add((Proxy) object);
+                    proxyTab.getTableView().getItems().add((Proxy) object);
                 } else if (object instanceof Script) {
-                    scriptTab.getListView().getItems().add((Script) object);
+                    scriptTab.getTableView().getItems().add((Script) object);
                 } else if (object instanceof Configuration) {
-                    runTab.getListView().getItems().add((Configuration) object);
+                    runTab.getTableView().getItems().add((Configuration) object);
                 }
             }
         });

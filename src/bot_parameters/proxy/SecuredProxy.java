@@ -28,11 +28,11 @@ public class SecuredProxy extends Proxy {
 
     @Override
     public final String toParameterString() {
-        return String.format("-bot_parameters.proxy %s:%d:%s:%s", getIP(), getPort(), username, password);
+        return String.format("-bot_parameters.proxy %s:%d:%s:%s", getIpAddress(), getPort(), username, password);
     }
 
     @Override
     public final String toString() {
-        return getIP() + ":" + getPort() + ":" + username;
+        return getIpAddress() + ":" + getPort() + ":" + username;
     }
 }

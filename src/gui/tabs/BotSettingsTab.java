@@ -17,7 +17,7 @@ public class BotSettingsTab extends Tab {
     private final PasswordField passwordField;
 
     private final Bot bot = new Bot();
-    private final OSBotAccount osBotAccount = new OSBotAccount();
+    private final OSBotAccount osBotAccount = new OSBotAccount("", "");
 
     public BotSettingsTab() {
         setText("Bot Settings");

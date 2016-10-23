@@ -1,5 +1,6 @@
 package file_manager;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,7 +12,9 @@ public class PropertiesFileManager {
     public static Optional<Properties> getOSBotProperties() {
         try {
             Properties osbotAccountProperties = new Properties();
-            FileInputStream propertiesInputStream = new FileInputStream("osbotAccountProperties");
+            File propertiesFile = new File("osbotAccountProperties");
+            if(!propertiesFile.exists()) return Optional.empty();
+            FileInputStream propertiesInputStream = new FileInputStream(propertiesFile);
             osbotAccountProperties.load(propertiesInputStream);
             propertiesInputStream.close();
             return Optional.of(osbotAccountProperties);
