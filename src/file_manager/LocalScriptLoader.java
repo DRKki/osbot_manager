@@ -12,8 +12,13 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class LocalScriptLoader {
+
+    private final Pattern nameRe = Pattern.compile("name\\s*=\\s*(.+)");
+    private final Pattern authorRe = Pattern.compile("author\\s*=\\s*(.+)");
 
     public final List<Script> getLocalScripts() {
 
@@ -47,7 +52,7 @@ public final class LocalScriptLoader {
         while (entries.hasMoreElements()) {
             JarEntry entry = (JarEntry) entries.nextElement();
             String name = entry.getName();
-            if (name.contains(".class")) {
+            if (name.endsWith(".class")) {
                 Script script = getScriptFromClass(classLoader, name);
                 if(script != null) {
                     return script;
@@ -69,15 +74,22 @@ public final class LocalScriptLoader {
     }
 
     private Script getScriptFromAnnotation(final String annotation) {
-        String name = "";
-        String author = "";
-        for (String component : annotation.split(", ")) {
-            if (component.startsWith("name=")) {
-                name = component.substring(5, component.length());
-            } else if(component.startsWith("author=")) {
-                author = component.substring(7, component.length());
+        String name = "", author = "";
+
+        for(final String component : annotation.split(",")) {
+
+            Matcher nameMatcher = nameRe.matcher(component);
+            if (nameMatcher.find()) {
+                name = nameMatcher.group(1);
             }
+
+            /*Matcher authorMatcher = authorRe.matcher(annotation);
+            if (authorMatcher.find()) {
+                author = authorMatcher.group(1);
+            }*/
         }
+
+        if(name.equals("")) return null;
         return new Script(name, "none", true);
     }
 }
