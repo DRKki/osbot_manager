@@ -9,6 +9,9 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Random;
 
@@ -17,15 +20,15 @@ public final class Configuration implements BotParameter, Serializable {
     private SimpleObjectProperty<RunescapeAccount> runescapeAccount;
     private SimpleObjectProperty<Script> script;
     private SimpleObjectProperty<Proxy> proxy;
-    private final SimpleIntegerProperty memoryAllocation = new SimpleIntegerProperty(-1);
-    private final SimpleBooleanProperty collectData = new SimpleBooleanProperty();
-    private final SimpleBooleanProperty debugMode = new SimpleBooleanProperty();
-    private final SimpleIntegerProperty debugPort = new SimpleIntegerProperty(-1);
-    private final SimpleBooleanProperty lowCpuMode = new SimpleBooleanProperty();
-    private final SimpleBooleanProperty lowResourceMode = new SimpleBooleanProperty();
-    private final SimpleObjectProperty<WorldType> worldType = new SimpleObjectProperty<>();
-    private final SimpleIntegerProperty world = new SimpleIntegerProperty(-1);
-    private final SimpleBooleanProperty randomizeWorld = new SimpleBooleanProperty();
+    private SimpleIntegerProperty memoryAllocation = new SimpleIntegerProperty(-1);
+    private SimpleBooleanProperty collectData = new SimpleBooleanProperty();
+    private SimpleBooleanProperty debugMode = new SimpleBooleanProperty();
+    private SimpleIntegerProperty debugPort = new SimpleIntegerProperty(-1);
+    private SimpleBooleanProperty lowCpuMode = new SimpleBooleanProperty();
+    private SimpleBooleanProperty lowResourceMode = new SimpleBooleanProperty();
+    private SimpleObjectProperty<WorldType> worldType = new SimpleObjectProperty<>();
+    private SimpleIntegerProperty world = new SimpleIntegerProperty(-1);
+    private SimpleBooleanProperty randomizeWorld = new SimpleBooleanProperty();
 
     public Configuration(final RunescapeAccount runescapeAccount, final Script script) {
         this.runescapeAccount = new SimpleObjectProperty<>(runescapeAccount);
@@ -102,6 +105,36 @@ public final class Configuration implements BotParameter, Serializable {
     public final void setWorld(final Integer world) { this.world.set(world); }
 
     public final void setRandomizeWorld(final boolean randomizeWorld) { this.randomizeWorld.set(randomizeWorld); }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.writeObject(getRunescapeAccount());
+        stream.writeObject(getScript());
+        stream.writeObject(getProxy());
+        stream.writeInt(getMemoryAllocation());
+        stream.writeBoolean(isCollectData());
+        stream.writeBoolean(isDebugMode());
+        stream.writeInt(getDebugPort());
+        stream.writeBoolean(isLowCpuMode());
+        stream.writeBoolean(isLowResourceMode());
+        stream.writeObject(getWorldType());
+        stream.writeInt(getWorld());
+        stream.writeBoolean(isRandomizeWorld());
+    }
+
+    private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {
+        runescapeAccount = new SimpleObjectProperty<>((RunescapeAccount) stream.readObject());
+        script = new SimpleObjectProperty<>((Script) stream.readObject());
+        proxy = new SimpleObjectProperty<>((Proxy) stream.readObject());
+        memoryAllocation = new SimpleIntegerProperty(stream.readInt());
+        collectData = new SimpleBooleanProperty(stream.readBoolean());
+        debugMode = new SimpleBooleanProperty(stream.readBoolean());
+        debugPort = new SimpleIntegerProperty(stream.readInt());
+        lowCpuMode = new SimpleBooleanProperty(stream.readBoolean());
+        lowResourceMode = new SimpleBooleanProperty(stream.readBoolean());
+        worldType = new SimpleObjectProperty<>((WorldType) stream.readObject());
+        world = new SimpleIntegerProperty(stream.readInt());
+        randomizeWorld = new SimpleBooleanProperty(stream.readBoolean());
+    }
 
     @Override
     public final String toParameterString() {

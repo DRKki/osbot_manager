@@ -4,6 +4,9 @@ import bot_parameters.interfaces.BotParameter;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public final class Script implements BotParameter, Serializable {
@@ -43,6 +46,18 @@ public final class Script implements BotParameter, Serializable {
     public final String toParameterString() {
         if (isLocal.get()) return String.format("-script \"\\\"%s\\\":%s\"", scriptIdentifier.get(), parameters.get());
         else return String.format("-script %s:%s", scriptIdentifier.get(), parameters.get());
+    }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.writeObject(scriptIdentifier.get());
+        stream.writeObject(parameters.get());
+        stream.writeBoolean(isLocal.get());
+    }
+
+    private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {
+        scriptIdentifier = new SimpleStringProperty((String) stream.readObject());
+        parameters = new SimpleStringProperty((String) stream.readObject());
+        isLocal = new SimpleBooleanProperty(stream.readBoolean());
     }
 
     @Override

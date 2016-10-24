@@ -2,11 +2,14 @@ package bot_parameters.account;
 
 import javafx.beans.property.SimpleStringProperty;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class Account implements Serializable {
 
-    private SimpleStringProperty username, password;
+    protected SimpleStringProperty username, password;
 
     public Account(final String username, final String password) {
         this.username = new SimpleStringProperty(username);
@@ -27,6 +30,16 @@ public class Account implements Serializable {
 
     public final void setPassword(String password) {
         this.password.set(password);
+    }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.writeObject(getUsername());
+        stream.writeObject(getPassword());
+    }
+
+    private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {
+        username = new SimpleStringProperty((String) stream.readObject());
+        password = new SimpleStringProperty((String) stream.readObject());
     }
 
     @Override

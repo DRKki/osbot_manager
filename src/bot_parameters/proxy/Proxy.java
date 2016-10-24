@@ -4,12 +4,15 @@ import bot_parameters.interfaces.BotParameter;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class Proxy implements BotParameter, Serializable {
 
-    private SimpleStringProperty ipAddress;
-    private SimpleIntegerProperty port;
+    protected SimpleStringProperty ipAddress;
+    protected SimpleIntegerProperty port;
 
     public Proxy(final String ipAddress, final int port) {
         this.ipAddress = new SimpleStringProperty(ipAddress);
@@ -29,6 +32,16 @@ public class Proxy implements BotParameter, Serializable {
     }
 
     public final void setPort(final int port) { this.port.set(port); }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.writeObject(getIpAddress());
+        stream.writeInt(getPort());
+    }
+
+    private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {
+        ipAddress = new SimpleStringProperty((String) stream.readObject());
+        port = new SimpleIntegerProperty(stream.readInt());
+    }
 
     @Override
     public String toParameterString() {

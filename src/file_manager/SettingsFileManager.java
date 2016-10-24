@@ -28,6 +28,7 @@ public final class SettingsFileManager {
         } catch (final EOFException e) {
             System.out.println("Config file read successfully.");
         } catch (final Exception e) {
+            e.printStackTrace();
             new ExceptionDialog(e).show();
         }
         return objects;
@@ -52,6 +53,7 @@ public final class SettingsFileManager {
                 }
             }
         } catch (final Exception e) {
+            e.printStackTrace();
             new ExceptionDialog(e).show();
         }
     }

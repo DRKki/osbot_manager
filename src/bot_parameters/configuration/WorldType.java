@@ -1,6 +1,8 @@
 package bot_parameters.configuration;
 
-public enum WorldType {
+import java.io.Serializable;
+
+public enum WorldType implements Serializable {
     F2P (301, 308, 316, 326, 335, 382, 383, 384, 393, 394),
     MEMBERS (302, 303, 304, 305, 306, 309, 310, 311, 312, 313, 314, 317, 318, 319, 320,
             321, 322, 327, 328, 329, 330, 333, 334, 336, 338, 341, 342, 343, 344,

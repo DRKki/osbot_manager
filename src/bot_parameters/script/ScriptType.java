@@ -1,6 +1,8 @@
 package bot_parameters.script;
 
-public enum ScriptType {
+import java.io.Serializable;
+
+public enum ScriptType implements Serializable {
     LOCAL,
     SDN;
 
