@@ -45,7 +45,7 @@ public class Proxy implements BotParameter, Serializable {
 
     @Override
     public String toParameterString() {
-        return String.format("-bot_parameters.proxy %s:%d", ipAddress.get(), port.get());
+        return String.format("-proxy %s:%d", ipAddress.get(), port.get());
     }
 
     @Override
