@@ -177,14 +177,14 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         if (!memoryAllocation.getText().trim().isEmpty()) {
             existingItem.setMemoryAllocation(Integer.parseInt(memoryAllocation.getText().trim()));
         } else {
-            existingItem.setMemoryAllocation(null);
+            existingItem.setMemoryAllocation(-1);
         }
         if (debugMode.isSelected() && !debugPort.getText().trim().isEmpty()) {
             existingItem.setDebugMode(true);
             existingItem.setDebugPort(Integer.parseInt(debugPort.getText().trim()));
         } else {
             existingItem.setDebugMode(false);
-            existingItem.setDebugPort(null);
+            existingItem.setDebugPort(-1);
         }
         existingItem.setCollectData(collectData.isSelected());
         existingItem.setLowCpuMode(lowCpuMode.isSelected());

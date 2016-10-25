@@ -1,6 +1,7 @@
 package file_manager;
 
 import bot_parameters.script.Script;
+import org.osbot.rs07.script.ScriptManifest;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -12,13 +13,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class LocalScriptLoader {
-
-    private final Pattern nameRe = Pattern.compile("name=([^,)]+)");
-    private final Pattern authorRe = Pattern.compile("author=(.+)");
 
     public final List<Script> getLocalScripts() {
 
@@ -64,24 +60,10 @@ public final class LocalScriptLoader {
 
     private Script getScriptFromClass(final ClassLoader classLoader, final String className) throws ClassNotFoundException {
         Class cls = classLoader.loadClass(className.replace('/', '.').replace(".class", ""));
-        for (Annotation annotation : cls.getAnnotations()) {
-            String annotationStr = annotation.toString();
-            if (annotationStr.contains("ScriptManifest")) {
-                return getScriptFromAnnotation(annotationStr);
-            }
+        Annotation scriptManifest = cls.getAnnotation(ScriptManifest.class);
+        if(scriptManifest != null) {
+            return new Script(((ScriptManifest) scriptManifest).name(), "", true);
         }
         return null;
-    }
-
-    private Script getScriptFromAnnotation(final String annotation) {
-        String name = "", author = "";
-
-        Matcher nameMatcher = nameRe.matcher(annotation);
-        if (nameMatcher.find()) {
-            name = nameMatcher.group(1);
-        }
-
-        if(name.equals("")) return null;
-        return new Script(name, "none", true);
     }
 }
