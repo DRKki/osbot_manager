@@ -17,8 +17,8 @@ import java.util.regex.Pattern;
 
 public final class LocalScriptLoader {
 
-    private final Pattern nameRe = Pattern.compile("name\\s*=\\s*(.+)");
-    private final Pattern authorRe = Pattern.compile("author\\s*=\\s*(.+)");
+    private final Pattern nameRe = Pattern.compile("name=([^,)]+)");
+    private final Pattern authorRe = Pattern.compile("author=(.+)");
 
     public final List<Script> getLocalScripts() {
 
@@ -76,17 +76,9 @@ public final class LocalScriptLoader {
     private Script getScriptFromAnnotation(final String annotation) {
         String name = "", author = "";
 
-        for(final String component : annotation.split(",")) {
-
-            Matcher nameMatcher = nameRe.matcher(component);
-            if (nameMatcher.find()) {
-                name = nameMatcher.group(1);
-            }
-
-            /*Matcher authorMatcher = authorRe.matcher(annotation);
-            if (authorMatcher.find()) {
-                author = authorMatcher.group(1);
-            }*/
+        Matcher nameMatcher = nameRe.matcher(annotation);
+        if (nameMatcher.find()) {
+            name = nameMatcher.group(1);
         }
 
         if(name.equals("")) return null;
