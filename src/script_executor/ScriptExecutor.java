@@ -20,12 +20,6 @@ public class ScriptExecutor {
 
         List<String> command = new ArrayList<>();
 
-        if(System.getProperty("os.name").toLowerCase().contains("win")) {
-            Collections.addAll(command, "CMD", "/C");
-        } else {
-            Collections.addAll(command, "/bin/bash", "-c");
-        }
-
         Collections.addAll(command, "java", "-jar", osbotPath);
         Collections.addAll(command, osBotAccount.toParameterString().split(" "));
         Collections.addAll(command, configuration.toParameterString().split(" "));
@@ -35,7 +29,6 @@ public class ScriptExecutor {
             ProcessBuilder processBuilder = new ProcessBuilder(command);
             processBuilder.redirectErrorStream(true);
             final Process process = processBuilder.start();
-            System.out.println(processBuilder.command());
             try (final InputStream stdout = process.getInputStream();
                  final InputStreamReader inputStreamReader = new InputStreamReader(stdout);
                  final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
