@@ -24,6 +24,8 @@ public class ScriptExecutor {
         Collections.addAll(command, osBotAccount.toParameterString().split(" "));
         Collections.addAll(command, configuration.toParameterString().split(" "));
 
+        System.out.println(String.join(" ", command));
+
         try {
 
             ProcessBuilder processBuilder = new ProcessBuilder(command);

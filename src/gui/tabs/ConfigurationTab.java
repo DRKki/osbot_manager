@@ -63,13 +63,19 @@ public class ConfigurationTab extends TableTab<Configuration> {
         TableColumn<Configuration, Integer> debugPortCol = new TableColumn<>("Debug Port");
         debugPortCol.setCellValueFactory(new PropertyValueFactory<>("debugPort"));
 
-        TableColumn<Configuration, Integer> lowCpuCol = new TableColumn<>("Low CPU");
+        TableColumn<Configuration, Boolean> lowCpuCol = new TableColumn<>("Low CPU");
         lowCpuCol.setCellValueFactory(new PropertyValueFactory<>("lowCpuMode"));
 
-        TableColumn<Configuration, Integer> lowResCol = new TableColumn<>("Low Resource");
+        TableColumn<Configuration, Boolean> lowResCol = new TableColumn<>("Low Resource");
         lowResCol.setCellValueFactory(new PropertyValueFactory<>("lowResourceMode"));
 
-        getTableView().getColumns().addAll(scriptCol, accountCol, worldTypeCol, randomWorldCol, worldCol, proxyCol, memoryCol, collectDataCol, debugModeCol, debugPortCol, lowCpuCol, lowResCol);
+        TableColumn<Configuration, Boolean> reflectionCol = new TableColumn<>("Reflection");
+        reflectionCol.setCellValueFactory(new PropertyValueFactory<>("reflection"));
+
+        TableColumn<Configuration, Boolean> noRandomsCol = new TableColumn<>("No Randoms");
+        noRandomsCol.setCellValueFactory(new PropertyValueFactory<>("noRandoms"));
+
+        getTableView().getColumns().addAll(scriptCol, accountCol, worldTypeCol, randomWorldCol, worldCol, proxyCol, memoryCol, collectDataCol, debugModeCol, debugPortCol, lowCpuCol, lowResCol, reflectionCol, noRandomsCol);
     }
 
     private void start() {

@@ -11,8 +11,10 @@ import java.io.Serializable;
 
 public class Proxy implements BotParameter, Serializable {
 
-    protected SimpleStringProperty ipAddress;
-    protected SimpleIntegerProperty port;
+    private static final long serialVersionUID = -6367454010350132779L;
+
+    SimpleStringProperty ipAddress;
+    SimpleIntegerProperty port;
 
     public Proxy(final String ipAddress, final int port) {
         this.ipAddress = new SimpleStringProperty(ipAddress);

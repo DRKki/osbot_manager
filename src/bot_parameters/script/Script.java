@@ -11,6 +11,8 @@ import java.io.Serializable;
 
 public final class Script implements BotParameter, Serializable {
 
+    private static final long serialVersionUID = -3697946363287646016L;
+
     private SimpleStringProperty author;
     private SimpleStringProperty scriptIdentifier;
     private SimpleStringProperty parameters;

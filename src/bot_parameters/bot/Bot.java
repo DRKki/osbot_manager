@@ -5,8 +5,11 @@ import bot_parameters.interfaces.BotParameter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
-public final class Bot implements BotParameter {
+public final class Bot implements BotParameter, Serializable {
+
+    private static final long serialVersionUID = 3351956474698861300L;
 
     private String osbotPath;
 

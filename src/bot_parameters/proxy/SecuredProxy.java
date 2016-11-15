@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 
 public class SecuredProxy extends Proxy {
 
+    private static final long serialVersionUID = -1302145627906882719L;
+
     private String username, password;
 
     public SecuredProxy(final String ip, final int port, final String username, final String password) {

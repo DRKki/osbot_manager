@@ -26,6 +26,8 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
     private final TextField debugPort;
     private final CheckBox lowResourceMode;
     private final CheckBox lowCpuMode;
+    private final CheckBox enableReflection;
+    private final CheckBox noRandoms;
     private final ChoiceBox<WorldType> worldTypeSelector;
     private final CheckBox randomizeWorld;
     private final ChoiceBox<Integer> worldSelector;
@@ -59,6 +61,10 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         lowResourceMode = new CheckBox("Low resource mode");
 
         lowCpuMode = new CheckBox("Low cpu mode");
+
+        enableReflection = new CheckBox("Reflection");
+
+        noRandoms = new CheckBox("No randoms");
 
         worldTypeSelector = new ChoiceBox<>(FXCollections.observableArrayList(WorldType.values()));
 
@@ -95,6 +101,8 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         grid.add(debugPort, 2, 6);
         grid.add(lowResourceMode, 1, 7);
         grid.add(lowCpuMode, 1, 8);
+        grid.add(enableReflection, 1, 9);
+        grid.add(noRandoms, 1, 10);
 
         accountSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
             okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null ||
@@ -121,6 +129,8 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
             debugPort.setText("");
             lowResourceMode.setSelected(false);
             lowCpuMode.setSelected(false);
+            enableReflection.setSelected(false);
+            noRandoms.setSelected(false);
             worldTypeSelector.getSelectionModel().select(WorldType.F2P);
             worldSelector.getSelectionModel().select(0);
             randomizeWorld.setSelected(false);
@@ -135,6 +145,8 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         debugPort.setText(String.valueOf(existingItem.getDebugPort()));
         lowResourceMode.setSelected(existingItem.isLowResourceMode());
         lowCpuMode.setSelected(existingItem.isLowCpuMode());
+        enableReflection.setSelected(existingItem.enableReflection());
+        noRandoms.setSelected(existingItem.noRandoms());
         worldTypeSelector.getSelectionModel().select(existingItem.getWorldType());
         worldSelector.getSelectionModel().select(existingItem.getWorld());
         randomizeWorld.setSelected(existingItem.isRandomizeWorld());
@@ -153,15 +165,11 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
             configuration.setDebugMode(true);
             configuration.setDebugPort(Integer.parseInt(debugPort.getText().trim()));
         }
-        if (collectData.isSelected()) {
-            configuration.setCollectData(true);
-        }
-        if (lowCpuMode.isSelected()) {
-            configuration.setLowCpuMode(true);
-        }
-        if (lowResourceMode.isSelected()) {
-            configuration.setLowResourceMode(true);
-        }
+        configuration.setCollectData(collectData.isSelected());
+        configuration.setLowCpuMode(lowCpuMode.isSelected());
+        configuration.setLowResourceMode(lowResourceMode.isSelected());
+        configuration.setReflection(enableReflection.isSelected());
+        configuration.setNoRandoms(noRandoms.isSelected());
         configuration.setWorldType(worldTypeSelector.getValue());
         configuration.setWorld(worldSelector.getValue());
         configuration.setRandomizeWorld(randomizeWorld.isSelected());
@@ -189,6 +197,8 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         existingItem.setCollectData(collectData.isSelected());
         existingItem.setLowCpuMode(lowCpuMode.isSelected());
         existingItem.setLowResourceMode(lowResourceMode.isSelected());
+        existingItem.setReflection(enableReflection.isSelected());
+        existingItem.setNoRandoms(noRandoms.isSelected());
         existingItem.setWorldType(worldTypeSelector.getValue());
         existingItem.setWorld(worldSelector.getValue());
         existingItem.setRandomizeWorld(randomizeWorld.isSelected());

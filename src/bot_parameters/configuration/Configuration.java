@@ -13,9 +13,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public final class Configuration implements BotParameter, Serializable {
+
+    private static final long serialVersionUID = 1938451332017337304L;
 
     private SimpleObjectProperty<RunescapeAccount> runescapeAccount;
     private SimpleObjectProperty<Script> script;
@@ -26,6 +30,8 @@ public final class Configuration implements BotParameter, Serializable {
     private SimpleIntegerProperty debugPort = new SimpleIntegerProperty(-1);
     private SimpleBooleanProperty lowCpuMode = new SimpleBooleanProperty();
     private SimpleBooleanProperty lowResourceMode = new SimpleBooleanProperty();
+    private SimpleBooleanProperty reflection = new SimpleBooleanProperty();
+    private SimpleBooleanProperty noRandoms = new SimpleBooleanProperty();
     private SimpleObjectProperty<WorldType> worldType = new SimpleObjectProperty<>();
     private SimpleIntegerProperty world = new SimpleIntegerProperty(-1);
     private SimpleBooleanProperty randomizeWorld = new SimpleBooleanProperty();
@@ -66,6 +72,10 @@ public final class Configuration implements BotParameter, Serializable {
 
     public final boolean isLowCpuMode() { return lowCpuMode.get(); }
 
+    public final boolean enableReflection() { return reflection.get(); }
+
+    public final boolean noRandoms() { return noRandoms.get(); }
+
     public final WorldType getWorldType() { return worldType.get(); }
 
     public final Integer getWorld() { return world.get(); }
@@ -98,7 +108,11 @@ public final class Configuration implements BotParameter, Serializable {
 
     public final void setLowCpuMode(final boolean lowCpuMode) { this.lowCpuMode.set(lowCpuMode); }
 
-    public final void setLowResourceMode (final boolean lowResourceMode) { this.lowResourceMode.set(lowResourceMode); }
+    public final void setLowResourceMode(final boolean lowResourceMode) { this.lowResourceMode.set(lowResourceMode); }
+
+    public final void setReflection(final boolean reflection) { this.reflection.set(reflection); }
+
+    public final void setNoRandoms(final boolean noRandoms) { this.noRandoms.set(noRandoms); }
 
     public final void setWorldType(final WorldType worldType) { this.worldType.set(worldType); }
 
@@ -119,6 +133,8 @@ public final class Configuration implements BotParameter, Serializable {
         stream.writeObject(getWorldType());
         stream.writeInt(getWorld());
         stream.writeBoolean(isRandomizeWorld());
+        stream.writeBoolean(enableReflection());
+        stream.writeBoolean(noRandoms());
     }
 
     private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {
@@ -134,6 +150,12 @@ public final class Configuration implements BotParameter, Serializable {
         worldType = new SimpleObjectProperty<>((WorldType) stream.readObject());
         world = new SimpleIntegerProperty(stream.readInt());
         randomizeWorld = new SimpleBooleanProperty(stream.readBoolean());
+        try {
+            reflection = new SimpleBooleanProperty(stream.readBoolean());
+            noRandoms = new SimpleBooleanProperty(stream.readBoolean());
+        } catch (Exception e) {
+            System.out.println("Config does not contain new allow options, skipping");
+        }
     }
 
     @Override
@@ -144,9 +166,15 @@ public final class Configuration implements BotParameter, Serializable {
         if (collectData.get()) parameterString += " -data 1";
         if (debugMode.get() && debugPort.get() != -1) parameterString += " -debug " + debugPort.get();
 
-        if (lowResourceMode.get() && lowCpuMode.get()) parameterString += " -allow lowresource,lowcpu";
-        else if (lowResourceMode.get()) parameterString += " -allow lowresource";
-        else if (lowCpuMode.get()) parameterString += " -allow lowcpu";
+        List<String> allowParams = new ArrayList<>();
+        if (lowResourceMode.get()) allowParams.add("lowresource");
+        if (lowCpuMode.get()) allowParams.add("lowcpu");
+        if (reflection.get()) allowParams.add("reflection");
+        if (noRandoms.get()) allowParams.add("norandoms");
+
+        if (!allowParams.isEmpty()) {
+            parameterString += " -allow " + String.join(",", allowParams);
+        }
 
         int worldVal;
         if (randomizeWorld.get()) worldVal = worldType.get().worlds[new Random().nextInt(worldType.get().worlds.length)];

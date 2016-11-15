@@ -9,6 +9,8 @@ import java.io.Serializable;
 
 public class Account implements Serializable {
 
+    private static final long serialVersionUID = 7601621618280835775L;
+
     protected SimpleStringProperty username, password;
 
     public Account(final String username, final String password) {

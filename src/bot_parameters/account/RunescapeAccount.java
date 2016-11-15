@@ -10,6 +10,8 @@ import java.io.ObjectOutputStream;
 
 public final class RunescapeAccount extends Account implements BotParameter {
 
+    private static final long serialVersionUID = 4730705293691635049L;
+
     private SimpleIntegerProperty pin;
 
     public RunescapeAccount(final String username, final String password, final int pin) {
