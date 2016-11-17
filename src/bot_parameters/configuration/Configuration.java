@@ -4,7 +4,6 @@ import bot_parameters.account.RunescapeAccount;
 import bot_parameters.interfaces.BotParameter;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -72,9 +71,9 @@ public final class Configuration implements BotParameter, Serializable {
 
     public final boolean isLowCpuMode() { return lowCpuMode.get(); }
 
-    public final boolean enableReflection() { return reflection.get(); }
+    public final boolean isReflection() { return reflection.get(); }
 
-    public final boolean noRandoms() { return noRandoms.get(); }
+    public final boolean isNoRandoms() { return noRandoms.get(); }
 
     public final WorldType getWorldType() { return worldType.get(); }
 
@@ -133,8 +132,8 @@ public final class Configuration implements BotParameter, Serializable {
         stream.writeObject(getWorldType());
         stream.writeInt(getWorld());
         stream.writeBoolean(isRandomizeWorld());
-        stream.writeBoolean(enableReflection());
-        stream.writeBoolean(noRandoms());
+        stream.writeBoolean(isReflection());
+        stream.writeBoolean(isNoRandoms());
     }
 
     private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {

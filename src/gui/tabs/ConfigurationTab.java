@@ -7,7 +7,6 @@ import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
 import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ConfigurationDialog;
-import gui.dialogues.input_dialog.ProxyDialog;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;

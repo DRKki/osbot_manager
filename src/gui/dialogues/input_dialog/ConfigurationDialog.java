@@ -2,8 +2,6 @@ package gui.dialogues.input_dialog;
 
 import bot_parameters.configuration.WorldType;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -11,9 +9,6 @@ import bot_parameters.account.RunescapeAccount;
 import bot_parameters.configuration.Configuration;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
-import javafx.scene.control.cell.CheckBoxListCell;
-
-import java.util.ArrayList;
 
 public final class ConfigurationDialog extends InputDialog<Configuration> {
 
@@ -145,8 +140,8 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         debugPort.setText(String.valueOf(existingItem.getDebugPort()));
         lowResourceMode.setSelected(existingItem.isLowResourceMode());
         lowCpuMode.setSelected(existingItem.isLowCpuMode());
-        enableReflection.setSelected(existingItem.enableReflection());
-        noRandoms.setSelected(existingItem.noRandoms());
+        enableReflection.setSelected(existingItem.isReflection());
+        noRandoms.setSelected(existingItem.isNoRandoms());
         worldTypeSelector.getSelectionModel().select(existingItem.getWorldType());
         worldSelector.getSelectionModel().select(existingItem.getWorld());
         randomizeWorld.setSelected(existingItem.isRandomizeWorld());
