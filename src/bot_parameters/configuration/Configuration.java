@@ -155,6 +155,8 @@ public final class Configuration implements BotParameter, Serializable {
             noRandoms = new SimpleBooleanProperty(stream.readBoolean());
         } catch (Exception e) {
             System.out.println("Config does not contain new allow options, skipping");
+            reflection = new SimpleBooleanProperty();
+            noRandoms = new SimpleBooleanProperty();
         }
     }
 
