@@ -8,8 +8,10 @@ import bot_parameters.script.Script;
 import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ConfigurationDialog;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.PropertyValueFactory;
 import script_executor.ScriptExecutor;
 
@@ -75,6 +77,46 @@ public class ConfigurationTab extends TableTab<Configuration> {
         noRandomsCol.setCellValueFactory(new PropertyValueFactory<>("noRandoms"));
 
         getTableView().getColumns().addAll(scriptCol, accountCol, worldTypeCol, randomWorldCol, worldCol, proxyCol, memoryCol, collectDataCol, debugModeCol, debugPortCol, lowCpuCol, lowResCol, reflectionCol, noRandomsCol);
+
+        getTableView().setRowFactory(param -> {
+
+            TableRow<Configuration> row = new TableRow<>();
+
+            row.itemProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue != null) {
+
+                    String rowStyle = row.getStyle();
+
+                    newValue.addRunListener((observable1, oldValue1, newValue1) -> {
+                        if (newValue.isRunning()) {
+                            row.setStyle(rowStyle + "-fx-background-color: #49E20E");
+                        } else {
+                            row.setStyle(rowStyle);
+                        }
+                    });
+                }
+            });
+            return row;
+        });
+
+        Thread processChecker = new Thread(new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                while(true) {
+                    getTableView().getItems()
+                                  .stream()
+                                  .filter(Configuration::isRunning)
+                                  .filter(configuration -> !configuration.getProcess().isAlive())
+                                  .forEach(configuration -> {
+                                      configuration.setRunning(false);
+                                      configuration.setProcess(null);
+                    });
+                    Thread.sleep(1000);
+                }
+            }
+        });
+        processChecker.setDaemon(true);
+        processChecker.start();
     }
 
     private void start() {
@@ -87,7 +129,10 @@ public class ConfigurationTab extends TableTab<Configuration> {
 
     private void onStart(final Configuration item) {
         try {
-            ScriptExecutor.execute(botSettingsTab.getBot().getOsbotPath(), botSettingsTab.getOsBotAccount(), item);
+            ScriptExecutor.execute(botSettingsTab.getBot().getOsbotPath(), botSettingsTab.getOsBotAccount(), item).ifPresent(process -> {
+                item.setProcess(process);
+                item.setRunning(true);
+            });
         } catch (Exception e) {
             new ExceptionDialog(e).showAndWait();
         }

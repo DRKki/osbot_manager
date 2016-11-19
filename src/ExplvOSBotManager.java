@@ -2,10 +2,15 @@ import gui.ManagerPane;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
+import java.util.concurrent.ExecutorService;
 
 public final class ExplvOSBotManager extends Application {
 
@@ -23,7 +28,7 @@ public final class ExplvOSBotManager extends Application {
         primaryStage.show();
     }
 
-    private final void showUpdateDialog() {
+    private void showUpdateDialog() {
         Dialog dialog = new Dialog();
         dialog.setTitle("Explv's OSBot Manager");
 

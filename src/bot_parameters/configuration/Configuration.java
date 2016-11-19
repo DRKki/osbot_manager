@@ -7,13 +7,16 @@ import bot_parameters.script.Script;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public final class Configuration implements BotParameter, Serializable {
@@ -34,12 +37,19 @@ public final class Configuration implements BotParameter, Serializable {
     private SimpleObjectProperty<WorldType> worldType = new SimpleObjectProperty<>();
     private SimpleIntegerProperty world = new SimpleIntegerProperty(-1);
     private SimpleBooleanProperty randomizeWorld = new SimpleBooleanProperty();
+    private SimpleBooleanProperty isRunning = new SimpleBooleanProperty();
+
+    private Process process;
 
     public Configuration(final RunescapeAccount runescapeAccount, final Script script) {
         this.runescapeAccount = new SimpleObjectProperty<>(runescapeAccount);
         this.script = new SimpleObjectProperty<>(script);
         this.proxy = new SimpleObjectProperty<>(new Proxy("No Proxy", -1));
     }
+
+    public Process getProcess() { return process; }
+
+    public void setProcess(final Process process) { this.process = process; }
 
     public RunescapeAccount getRunescapeAccount() {
         return runescapeAccount.get();
@@ -119,6 +129,12 @@ public final class Configuration implements BotParameter, Serializable {
 
     public final void setRandomizeWorld(final boolean randomizeWorld) { this.randomizeWorld.set(randomizeWorld); }
 
+    public final boolean isRunning() { return isRunning.get(); }
+
+    public void setRunning(final boolean isRunning) { this.isRunning.set(isRunning); }
+
+    public final void addRunListener(final ChangeListener<Boolean> listener) { isRunning.addListener(listener); }
+
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeObject(getRunescapeAccount());
         stream.writeObject(getScript());
@@ -157,6 +173,7 @@ public final class Configuration implements BotParameter, Serializable {
             reflection = new SimpleBooleanProperty();
             noRandoms = new SimpleBooleanProperty();
         }
+        isRunning = new SimpleBooleanProperty();
     }
 
     @Override
@@ -165,7 +182,15 @@ public final class Configuration implements BotParameter, Serializable {
         if (proxy != null) parameterString += " " + proxy.get().toParameterString();
         if (memoryAllocation.get() != -1) parameterString += " -mem " + memoryAllocation.get();
         if (collectData.get()) parameterString += " -data 1";
-        if (debugMode.get() && debugPort.get() != -1) parameterString += " -debug " + debugPort.get();
+
+        if (debugMode.get() && debugPort.get() != -1) {
+            parameterString += " -debug " + debugPort.get();
+        } else {
+            Optional<Integer> availablePort = getAvailablePort();
+            if (availablePort.isPresent()) {
+                parameterString += " -debug " + availablePort.get();
+            }
+        }
 
         List<String> allowParams = new ArrayList<>();
         if (lowResourceMode.get()) allowParams.add("lowresource");
@@ -184,5 +209,14 @@ public final class Configuration implements BotParameter, Serializable {
         if (worldVal != -1) parameterString += " -world " + worldVal;
 
         return parameterString;
+    }
+
+    private Optional<Integer> getAvailablePort() {
+        try (ServerSocket serverSocket = new ServerSocket(0)) {
+            return Optional.of(serverSocket.getLocalPort());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
     }
 }

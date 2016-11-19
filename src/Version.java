@@ -6,7 +6,7 @@ import java.net.URL;
 
 public class Version {
 
-    private final static float currentVersion = 5.0f;
+    private final static float currentVersion = 5.1f;
 
     public static boolean isLatestVersion() {
         try {
@@ -18,7 +18,7 @@ public class Version {
 
                 final String version = bufferedReader.readLine();
 
-                System.out.println("Latest vesrion: " + version);
+                System.out.println("Latest version: " + version);
 
                 if (Float.parseFloat(version) > currentVersion) {
                     return false;

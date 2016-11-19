@@ -13,10 +13,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class ScriptExecutor {
 
-    public static void execute(final String osbotPath, final OSBotAccount osBotAccount, final Configuration configuration) throws ClientOutOfDateException, MissingWebWalkDataException, IncorrectLoginException {
+    public static Optional<Process> execute(final String osbotPath, final OSBotAccount osBotAccount, final Configuration configuration) throws ClientOutOfDateException, MissingWebWalkDataException, IncorrectLoginException, InterruptedException {
 
         List<String> command = new ArrayList<>();
 
@@ -28,9 +29,10 @@ public class ScriptExecutor {
 
         try {
 
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            final ProcessBuilder processBuilder = new ProcessBuilder(command);
             processBuilder.redirectErrorStream(true);
             final Process process = processBuilder.start();
+
             try (final InputStream stdout = process.getInputStream();
                  final InputStreamReader inputStreamReader = new InputStreamReader(stdout);
                  final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
@@ -38,17 +40,25 @@ public class ScriptExecutor {
                 String outputLine;
                 while ((outputLine = bufferedReader.readLine()) != null) {
 
+                    System.out.println(outputLine);
+
                     if (outputLine.toLowerCase().contains("out of date")) {
                         throw new ClientOutOfDateException();
                     } else if (outputLine.toLowerCase().contains("walking")) {
                         throw new MissingWebWalkDataException();
                     } else if (outputLine.toLowerCase().contains("invalid username or password")) {
                         throw new IncorrectLoginException();
+                    } else if (outputLine.contains("OSBot is now ready!")) {
+                        break;
                     }
                 }
             }
+
+            return Optional.of(process);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return Optional.empty();
     }
 }
