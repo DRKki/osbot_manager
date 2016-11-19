@@ -1,11 +1,16 @@
 package gui.tabs;
 
 import bot_parameters.account.RunescapeAccount;
+import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.RunescapeAccountDialog;
-import javafx.scene.control.TableCell;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.Callback;
+import javafx.stage.FileChooser;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 public class RunescapeAccountTab extends TableTab<RunescapeAccount> {
 
@@ -23,5 +28,44 @@ public class RunescapeAccountTab extends TableTab<RunescapeAccount> {
         pinCol.setCellValueFactory(new PropertyValueFactory<>("pin"));
 
         getTableView().getColumns().addAll(usernameCol, passwordCol, pinCol);
+
+        Button importFromFileButton = new Button("Import");
+        importFromFileButton.setMnemonicParsing(false);
+        importFromFileButton.setOnAction(e -> importFromFile());
+        getButtonBar().getButtons().add(importFromFileButton);
+    }
+
+    private void importFromFile() {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Explv's OSBot Manager");
+            final File file = fileChooser.showOpenDialog(null);
+
+            if (file == null) return;
+
+            try (FileReader fileReader = new FileReader(file);
+                 BufferedReader br = new BufferedReader(fileReader)) {
+
+                String line;
+                while((line = br.readLine()) != null) {
+
+                    String[] values = line.split(":");
+
+                    if (values.length < 2) {
+                        new ExceptionDialog(new Exception("The account: " + line + " is missing values, skipping.")).show();
+                        continue;
+                    }
+
+                    if (values.length == 2) {
+                        getTableView().getItems().add(new RunescapeAccount(values[0], values[1], 1234));
+                    } else {
+                        getTableView().getItems().add(new RunescapeAccount(values[0], values[1], Integer.parseInt(values[2])));
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            new ExceptionDialog(e).show();
+        }
     }
 }
