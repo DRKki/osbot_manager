@@ -7,7 +7,6 @@ import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
 import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ConfigurationDialog;
-import gui.dialogues.input_dialog.InputDialog;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.control.*;
@@ -20,21 +19,32 @@ import java.util.Optional;
 public class ConfigurationTab extends TableTab<Configuration> {
 
     private final BotSettingsTab botSettingsTab;
+    private final Button startButton, startAllButton;
 
     public ConfigurationTab(final ObservableList<RunescapeAccount> runescapeAccounts, final ObservableList<Script> scripts, final ObservableList<Proxy> proxies,  final BotSettingsTab botSettingsTab) {
         super("Configurations", "No configurations found.", new ConfigurationDialog(runescapeAccounts, scripts, proxies));
 
         this.botSettingsTab = botSettingsTab;
 
-        Button startButton = new Button("Start");
+        startButton = new Button("Start");
         startButton.setMnemonicParsing(false);
-        startButton.setOnAction(e -> start());
         toolBar.getItems().add(startButton);
 
-        Button startAllButton = new Button("Start All");
+        startAllButton = new Button("Start All");
         startAllButton.setMnemonicParsing(false);
-        startAllButton.setOnAction(e -> startAll());
         toolBar.getItems().add(startAllButton);
+
+        startButton.setOnAction(e -> {
+            startButton.setDisable(true);
+            startAllButton.setDisable(true);
+            start();
+        });
+
+        startAllButton.setOnAction(e -> {
+            startAllButton.setDisable(true);
+            startButton.setDisable(true);
+            startAll();})
+        ;
 
         TableColumn<Configuration, Script> scriptCol = new TableColumn<>("Script");
         scriptCol.setCellValueFactory(new PropertyValueFactory<>("script"));
@@ -86,9 +96,7 @@ public class ConfigurationTab extends TableTab<Configuration> {
 
             row.itemProperty().addListener((observable, oldValue, newValue) -> {
                 if (newValue != null) {
-
                     String rowStyle = row.getStyle();
-
                     newValue.addRunListener((observable1, oldValue1, newValue1) -> {
                         if (newValue.isRunning()) {
                             row.setStyle(rowStyle + "-fx-background-color: #49E20E;");
@@ -122,41 +130,27 @@ public class ConfigurationTab extends TableTab<Configuration> {
     }
 
     private void start() {
-        List<Configuration> selectedConfigs = getTableView().getSelectionModel().getSelectedItems();
-        if (selectedConfigs.size() > 1) {
-            Optional<Integer> delay = getDelayFromUser();
-            if (delay.isPresent()){
-                for (final Configuration config : selectedConfigs) {
-                    onStart(config);
-                    try {
-                        Thread.sleep(delay.get() * 1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } else {
-            onStart(selectedConfigs.get(0));
-        }
+        runConfigurations(getTableView().getSelectionModel().getSelectedItems());
     }
 
     private void startAll() {
-        List<Configuration> selectedConfigs = getTableView().getItems();
-        if (selectedConfigs.size() > 1) {
-            Optional<Integer> delay = getDelayFromUser();
-            if (delay.isPresent()){
-                for (final Configuration config : selectedConfigs) {
-                    onStart(config);
-                    try {
-                        Thread.sleep(delay.get() * 1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+        runConfigurations(getTableView().getItems());
+    }
+
+    private void runConfigurations(final List<Configuration> configurations) {
+        int delay = 0;
+        if (configurations.size() > 1) {
+            Optional<Integer> userDelayVal = getDelayFromUser();
+            if (userDelayVal.isPresent()){
+                delay = userDelayVal.get();
             }
-        } else {
-            onStart(selectedConfigs.get(0));
         }
+        Thread executorThread = new Thread(new ConfigurationExecutor(configurations, delay, () -> {
+            startAllButton.setDisable(false);
+            startButton.setDisable(false);
+        }));
+        executorThread.setDaemon(true);
+        executorThread.start();
     }
 
     private Optional<Integer> getDelayFromUser() {
@@ -173,14 +167,37 @@ public class ConfigurationTab extends TableTab<Configuration> {
         return Optional.empty();
     }
 
-    private void onStart(final Configuration item) {
-        try {
-            ScriptExecutor.execute(botSettingsTab.getBot().getOsbotPath(), botSettingsTab.getOsBotAccount(), item).ifPresent(process -> {
-                item.setProcess(process);
-                item.setRunning(true);
-            });
-        } catch (Exception e) {
-            new ExceptionDialog(e).showAndWait();
+    private class ConfigurationExecutor extends Task<Void> {
+
+        private final List<Configuration> configurations;
+        private final int delay;
+        private final ConfigurationExecuteCallback callback;
+
+        ConfigurationExecutor(final List<Configuration> configurations, final int delay, final ConfigurationExecuteCallback callback) {
+            this.configurations = configurations;
+            this.delay = delay;
+            this.callback = callback;
         }
+
+        @Override
+        protected Void call() throws Exception {
+            for (final Configuration configuration : configurations) {
+                try {
+                    ScriptExecutor.execute(botSettingsTab.getBot().getOsbotPath(), botSettingsTab.getOsBotAccount(), configuration).ifPresent(process -> {
+                        configuration.setProcess(process);
+                        configuration.setRunning(true);
+                    });
+                } catch (Exception e) {
+                    new ExceptionDialog(e).showAndWait();
+                }
+                Thread.sleep(delay);
+            }
+            callback.onComplete();
+            return null;
+        }
+    }
+
+    private interface ConfigurationExecuteCallback {
+        void onComplete();
     }
 }
