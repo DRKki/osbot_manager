@@ -10,7 +10,8 @@ import javafx.scene.layout.*;
 public class TableTab<T> extends Tab {
 
     private final TableView<T> tableView;
-    protected final ToolBar toolBar;
+    final ToolBar toolBar;
+    final ContextMenu contextMenu;
     private final InputDialog<T> inputDialog;
 
     TableTab(final String text, final String placeholder, final InputDialog<T> inputDialog) {
@@ -83,6 +84,22 @@ public class TableTab<T> extends Tab {
                 }
             }
         });
+
+        contextMenu = new ContextMenu();
+
+        MenuItem addOption = new MenuItem("Add");
+        addOption.setOnAction(e -> onAdd());
+        contextMenu.getItems().add(addOption);
+
+        MenuItem editOption = new MenuItem("Edit");
+        editOption.setOnAction(e -> onEdit());
+        contextMenu.getItems().add(editOption);
+
+        MenuItem removeOption = new MenuItem("Remove");
+        removeOption.setOnAction(e -> onRemove());
+        contextMenu.getItems().add(removeOption);
+
+        getTableView().contextMenuProperty().set(contextMenu);
     }
 
     public final TableView<T> getTableView() {

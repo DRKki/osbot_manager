@@ -6,7 +6,7 @@ import java.net.URL;
 
 public class Version {
 
-    private final static float currentVersion = 6.2f;
+    private final static float currentVersion = 6.3f;
 
     public static boolean isLatestVersion() {
         try {

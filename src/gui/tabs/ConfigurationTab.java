@@ -5,8 +5,12 @@ import bot_parameters.configuration.Configuration;
 import bot_parameters.configuration.WorldType;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
+import exceptions.ClientOutOfDateException;
+import exceptions.IncorrectLoginException;
+import exceptions.MissingWebWalkDataException;
 import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ConfigurationDialog;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.scene.control.*;
@@ -127,6 +131,10 @@ public class ConfigurationTab extends TableTab<Configuration> {
         });
         processChecker.setDaemon(true);
         processChecker.start();
+
+        MenuItem startOption = new MenuItem("Start");
+        startOption.setOnAction(e -> start());
+        contextMenu.getItems().add(startOption);
     }
 
     private void start() {
@@ -146,8 +154,10 @@ public class ConfigurationTab extends TableTab<Configuration> {
             }
         }
         Thread executorThread = new Thread(new ConfigurationExecutor(configurations, delay, () -> {
-            startAllButton.setDisable(false);
-            startButton.setDisable(false);
+            Platform.runLater(() -> {
+                startAllButton.setDisable(false);
+                startButton.setDisable(false);
+            });
         }));
         executorThread.setDaemon(true);
         executorThread.start();
@@ -180,17 +190,23 @@ public class ConfigurationTab extends TableTab<Configuration> {
         }
 
         @Override
-        protected Void call() throws Exception {
+        protected Void call() {
             for (final Configuration configuration : configurations) {
                 try {
                     ScriptExecutor.execute(botSettingsTab.getBot().getOsbotPath(), botSettingsTab.getOsBotAccount(), configuration).ifPresent(process -> {
-                        configuration.setProcess(process);
-                        configuration.setRunning(true);
+                        Platform.runLater(() -> {
+                            configuration.setProcess(process);
+                            configuration.setRunning(true);
+                        });
                     });
-                } catch (Exception e) {
-                    new ExceptionDialog(e).showAndWait();
+                } catch (ClientOutOfDateException | MissingWebWalkDataException | IncorrectLoginException | InterruptedException e) {
+                    Platform.runLater(() -> new ExceptionDialog(new Exception(e.getMessage())).showAndWait());
                 }
-                Thread.sleep(delay);
+                try {
+                    Thread.sleep(delay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             callback.onComplete();
             return null;
