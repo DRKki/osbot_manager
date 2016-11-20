@@ -111,7 +111,7 @@ public class TableTab<T> extends Tab {
         @Override
         protected void updateItem(final String item, final boolean empty) {
             super.updateItem(item, empty);
-            if(!isEmpty()){
+            if(item != null && !item.isEmpty()){
                 setText(new String(new char[item.length()]).replace("\0", "*"));
             } else{
                 setText(null);
