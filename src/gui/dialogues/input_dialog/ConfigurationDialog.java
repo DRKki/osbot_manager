@@ -12,9 +12,9 @@ import bot_parameters.script.Script;
 
 public final class ConfigurationDialog extends InputDialog<Configuration> {
 
-    private final ComboBox<RunescapeAccount> accountSelector;
-    private final ComboBox<Script> scriptSelector;
-    private final ComboBox<Proxy> proxySelector;
+    private final ChoiceBox<RunescapeAccount> accountSelector;
+    private final ChoiceBox<Script> scriptSelector;
+    private final ChoiceBox<Proxy> proxySelector;
     private final TextField memoryAllocation;
     private final CheckBox collectData;
     private final CheckBox debugMode;
@@ -32,14 +32,11 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
 
         setHeaderText("Add A Run Configuration");
 
-        accountSelector = new ComboBox<>(accountList);
-        accountSelector.setPromptText("Account");
+        accountSelector = new ChoiceBox<>(accountList);
 
-        scriptSelector = new ComboBox<>(scriptList);
-        scriptSelector.setPromptText("Script");
+        scriptSelector = new ChoiceBox<>(scriptList);
 
-        proxySelector = new ComboBox<>(proxyList);
-        proxySelector.setPromptText("(Optional) Proxy");
+        proxySelector = new ChoiceBox<>(proxyList);
 
         memoryAllocation = new TextField();
         memoryAllocation.setPromptText("(Optional) Memory Allocation");

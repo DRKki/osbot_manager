@@ -6,23 +6,56 @@ import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
 import file_manager.PropertiesFileManager;
 import file_manager.SettingsFileManager;
-import gui.dialogues.input_dialog.ConfigurationDialog;
-import gui.dialogues.input_dialog.ProxyDialog;
-import gui.dialogues.input_dialog.RunescapeAccountDialog;
-import gui.dialogues.input_dialog.ScriptDialog;
 import gui.tabs.*;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
-import javafx.scene.layout.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ManagerPane extends BorderPane {
 
     public ManagerPane() {
+
+        ToolBar topToolBar = new ToolBar();
+        topToolBar.setPadding(new Insets(10, 10, 10, 10));
+
+        Font titleFont = new Font("Arial", 22);
+
+        Text titleText1 = new Text("Explv");
+        titleText1.setFill(Color.web("#33b5e5"));
+        titleText1.setFont(titleFont);
+
+        Text titleText2 = new Text("'s OSBot Manager");
+        titleText2.setFill(Color.WHITE);
+        titleText2.setFont(titleFont);
+
+        TextFlow title = new TextFlow(titleText1, titleText2);
+
+        topToolBar.getItems().add(title);
+
+        Pane spacer = new Pane();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        topToolBar.getItems().add(spacer);
+
+        Button saveButton = new Button("Save");
+        topToolBar.getItems().add(saveButton);
+
+        Button loadButton = new Button("Load");
+        topToolBar.getItems().add(loadButton);
+
+        setTop(topToolBar);
 
         BotSettingsTab botSettingsTab = new BotSettingsTab();
 
@@ -36,7 +69,6 @@ public class ManagerPane extends BorderPane {
         tabPane.getTabs().addAll(runTab, scriptTab, runescapeAccountTab, proxyTab, botSettingsTab);
         setCenter(tabPane);
 
-        Button saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
             List<Serializable> objects = new ArrayList<>();
             objects.addAll(runescapeAccountTab.getTableView().getItems());
@@ -49,7 +81,6 @@ public class ManagerPane extends BorderPane {
                     botSettingsTab.getOsBotAccount().getPassword());
         });
 
-        Button loadButton = new Button("Load");
         loadButton.setOnAction(event -> {
             runescapeAccountTab.getTableView().getItems().clear();
             proxyTab.getTableView().getItems().clear();
@@ -67,13 +98,6 @@ public class ManagerPane extends BorderPane {
                 }
             }
         });
-
-        ToolBar toolBar = new ToolBar();
-
-        toolBar.getItems().add(saveButton);
-        toolBar.getItems().add(loadButton);
-
-        setTop(toolBar);
 
         PropertiesFileManager.getOSBotProperties().ifPresent(properties -> {
             if(properties.containsKey("path")) {

@@ -5,6 +5,7 @@ import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.RunescapeAccountDialog;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.ToolBar;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 
@@ -32,7 +33,7 @@ public class RunescapeAccountTab extends TableTab<RunescapeAccount> {
         Button importFromFileButton = new Button("Import");
         importFromFileButton.setMnemonicParsing(false);
         importFromFileButton.setOnAction(e -> importFromFile());
-        getButtonBar().getButtons().add(importFromFileButton);
+        toolBar.getItems().add(importFromFileButton);
     }
 
     private void importFromFile() {

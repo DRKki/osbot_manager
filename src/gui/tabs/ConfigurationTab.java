@@ -7,13 +7,15 @@ import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
 import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ConfigurationDialog;
+import gui.dialogues.input_dialog.InputDialog;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import script_executor.ScriptExecutor;
+
+import java.util.List;
+import java.util.Optional;
 
 public class ConfigurationTab extends TableTab<Configuration> {
 
@@ -27,12 +29,12 @@ public class ConfigurationTab extends TableTab<Configuration> {
         Button startButton = new Button("Start");
         startButton.setMnemonicParsing(false);
         startButton.setOnAction(e -> start());
-        getButtonBar().getButtons().add(startButton);
+        toolBar.getItems().add(startButton);
 
         Button startAllButton = new Button("Start All");
         startAllButton.setMnemonicParsing(false);
         startAllButton.setOnAction(e -> startAll());
-        getButtonBar().getButtons().add(startAllButton);
+        toolBar.getItems().add(startAllButton);
 
         TableColumn<Configuration, Script> scriptCol = new TableColumn<>("Script");
         scriptCol.setCellValueFactory(new PropertyValueFactory<>("script"));
@@ -89,7 +91,7 @@ public class ConfigurationTab extends TableTab<Configuration> {
 
                     newValue.addRunListener((observable1, oldValue1, newValue1) -> {
                         if (newValue.isRunning()) {
-                            row.setStyle(rowStyle + "-fx-background-color: #49E20E");
+                            row.setStyle(rowStyle + "-fx-background-color: #49E20E;");
                         } else {
                             row.setStyle(rowStyle);
                         }
@@ -120,11 +122,55 @@ public class ConfigurationTab extends TableTab<Configuration> {
     }
 
     private void start() {
-        getTableView().getSelectionModel().getSelectedItems().forEach(this::onStart);
+        List<Configuration> selectedConfigs = getTableView().getSelectionModel().getSelectedItems();
+        if (selectedConfigs.size() > 1) {
+            Optional<Integer> delay = getDelayFromUser();
+            if (delay.isPresent()){
+                for (final Configuration config : selectedConfigs) {
+                    onStart(config);
+                    try {
+                        Thread.sleep(delay.get() * 1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            onStart(selectedConfigs.get(0));
+        }
     }
 
     private void startAll() {
-        getTableView().getItems().forEach(this::onStart);
+        List<Configuration> selectedConfigs = getTableView().getItems();
+        if (selectedConfigs.size() > 1) {
+            Optional<Integer> delay = getDelayFromUser();
+            if (delay.isPresent()){
+                for (final Configuration config : selectedConfigs) {
+                    onStart(config);
+                    try {
+                        Thread.sleep(delay.get() * 1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } else {
+            onStart(selectedConfigs.get(0));
+        }
+    }
+
+    private Optional<Integer> getDelayFromUser() {
+        TextInputDialog delayDialog = new TextInputDialog("5");
+        delayDialog.setTitle("Explv's OSBot Manager");
+        delayDialog.setHeaderText("Set delay between bot starts");
+        delayDialog.setContentText("Enter delay (s):");
+
+        Optional<String> delayText = delayDialog.showAndWait();
+
+        if (delayText.isPresent()) {
+            return Optional.of(Integer.parseInt(delayText.get()));
+        }
+        return Optional.empty();
     }
 
     private void onStart(final Configuration item) {

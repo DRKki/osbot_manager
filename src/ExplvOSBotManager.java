@@ -10,8 +10,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import java.util.concurrent.ExecutorService;
-
 public final class ExplvOSBotManager extends Application {
 
     public static void main(final String[] args) {
@@ -24,7 +22,9 @@ public final class ExplvOSBotManager extends Application {
         if (!Version.isLatestVersion()) showUpdateDialog();
 
         primaryStage.setTitle("Explv's OSBot Manager");
-        primaryStage.setScene(new Scene(new ManagerPane(), 600, 400));
+        Scene scene = new Scene(new ManagerPane(), 600, 400);
+        scene.getStylesheets().add("style/manager_pane.css");
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 

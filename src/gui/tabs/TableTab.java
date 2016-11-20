@@ -1,17 +1,16 @@
 package gui.tabs;
 
 import gui.dialogues.input_dialog.InputDialog;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.*;
 
 public class TableTab<T> extends Tab {
 
     private final TableView<T> tableView;
-    private final ButtonBar buttonBar;
+    protected final ToolBar toolBar;
     private final InputDialog<T> inputDialog;
 
     TableTab(final String text, final String placeholder, final InputDialog<T> inputDialog) {
@@ -23,7 +22,6 @@ public class TableTab<T> extends Tab {
         BorderPane borderPane = new BorderPane();
 
         tableView = new TableView<>();
-        tableView.setStyle(".table-view .column-header .label{ -fx-alignment:CENTER; }");
         tableView.setPlaceholder(new Label(placeholder));
         tableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tableView.setOnKeyPressed(event -> {
@@ -37,24 +35,35 @@ public class TableTab<T> extends Tab {
             }
         });
 
+        tableView.widthProperty().addListener((source, oldWidth, newWidth) -> {
+            Pane header = (Pane) tableView.lookup("TableHeaderRow");
+            if (getTableView().getItems().isEmpty()) {
+                header.setVisible(false);
+            }
+        });
+
         borderPane.setCenter(tableView);
 
-        buttonBar = new ButtonBar();
-        buttonBar.setPadding(new Insets(10, 10, 10, 10));
-        BorderPane.setAlignment(buttonBar, Pos.CENTER);
-        borderPane.setBottom(buttonBar);
+        toolBar = new ToolBar();
+        toolBar.setPadding(new Insets(10, 10, 10, 10));
+
+        Pane spacer = new Pane();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        toolBar.getItems().add(spacer);
 
         Button addButton = new Button("Add");
         addButton.setOnAction(e -> onAdd());
-        buttonBar.getButtons().add(addButton);
+        toolBar.getItems().add(addButton);
 
         Button editButton = new Button("Edit");
         editButton.setOnAction(e -> onEdit());
-        buttonBar.getButtons().add(editButton);
+        toolBar.getItems().add(editButton);
 
         Button removeButton = new Button("Remove");
         removeButton.setOnAction(e -> onRemove());
-        buttonBar.getButtons().add(removeButton);
+        toolBar.getItems().add(removeButton);
+
+        borderPane.setBottom(toolBar);
 
         AnchorPane.setBottomAnchor(borderPane, 0.0);
         AnchorPane.setRightAnchor(borderPane, 0.0);
@@ -63,14 +72,21 @@ public class TableTab<T> extends Tab {
         AnchorPane anchorPane = new AnchorPane(borderPane);
 
         setContent(anchorPane);
+
+        getTableView().getItems().addListener(new ListChangeListener<T>() {
+            @Override
+            public void onChanged(Change<? extends T> c) {
+                if (getTableView().getItems().isEmpty()) {
+                    getTableView().lookup("TableHeaderRow").setVisible(false);
+                } else {
+                    getTableView().lookup("TableHeaderRow").setVisible(true);
+                }
+            }
+        });
     }
 
     public final TableView<T> getTableView() {
         return tableView;
-    }
-
-    final ButtonBar getButtonBar() {
-        return buttonBar;
     }
 
     private void onAdd() {
@@ -92,32 +108,13 @@ public class TableTab<T> extends Tab {
 
     final class PasswordFieldCell extends TableCell<T, String> {
 
-        private final PasswordField passwordField;
-
-        PasswordFieldCell() {
-            passwordField = new PasswordField();
-            passwordField.setEditable(false);
-            passwordField.setStyle(
-                    "-fx-background-color: -fx-control-inner-background;\n" +
-                    "-fx-background-insets: 0;\n" +
-                    "-fx-padding: 0 0 0 0;\n" +
-                    "-fx-faint-focus-color: transparent;\n" +
-                    "-fx-text-box-border: transparent;\n" +
-                    "-fx-border-radius:0;\n"
-            );
-
-            this.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-            this.setGraphic(null);
-        }
-
         @Override
         protected void updateItem(final String item, final boolean empty) {
             super.updateItem(item, empty);
             if(!isEmpty()){
-                passwordField.setText(item);
-                setGraphic(passwordField);
+                setText(new String(new char[item.length()]).replace("\0", "*"));
             } else{
-                setGraphic(null);
+                setText(null);
             }
         }
     }
