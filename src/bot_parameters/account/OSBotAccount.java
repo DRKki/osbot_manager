@@ -1,8 +1,9 @@
 package bot_parameters.account;
 
 import bot_parameters.interfaces.BotParameter;
+import bot_parameters.interfaces.Copyable;
 
-public final class OSBotAccount extends Account implements BotParameter {
+public final class OSBotAccount extends Account implements BotParameter, Copyable<OSBotAccount> {
 
     private static final long serialVersionUID = 3206668253057580659L;
 
@@ -13,5 +14,10 @@ public final class OSBotAccount extends Account implements BotParameter {
     @Override
     public final String toParameterString() {
         return String.format("-login %s:%s", getUsername(), getPassword());
+    }
+
+    @Override
+    public OSBotAccount createCopy() {
+        return new OSBotAccount(getUsername(), getPassword());
     }
 }

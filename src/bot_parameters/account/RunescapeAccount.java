@@ -1,6 +1,7 @@
 package bot_parameters.account;
 
 import bot_parameters.interfaces.BotParameter;
+import bot_parameters.interfaces.Copyable;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -8,7 +9,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public final class RunescapeAccount extends Account implements BotParameter {
+public final class RunescapeAccount extends Account implements BotParameter, Copyable<RunescapeAccount> {
 
     private static final long serialVersionUID = 4730705293691635049L;
 
@@ -42,5 +43,10 @@ public final class RunescapeAccount extends Account implements BotParameter {
     @Override
     public final String toParameterString() {
         return String.format("-bot %s:%s:%d", getUsername(), getPassword(), pin.get());
+    }
+
+    @Override
+    public RunescapeAccount createCopy() {
+        return new RunescapeAccount(getUsername(), getPassword(), getPin());
     }
 }

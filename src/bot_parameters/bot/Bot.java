@@ -1,6 +1,7 @@
 package bot_parameters.bot;
 
 import bot_parameters.interfaces.BotParameter;
+import bot_parameters.interfaces.Copyable;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

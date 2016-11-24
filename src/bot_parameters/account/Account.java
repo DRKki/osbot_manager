@@ -7,7 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public class Account implements Serializable {
+public abstract class Account implements Serializable {
 
     private static final long serialVersionUID = 7601621618280835775L;
 

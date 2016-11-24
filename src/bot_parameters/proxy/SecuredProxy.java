@@ -1,5 +1,6 @@
 package bot_parameters.proxy;
 
+import bot_parameters.interfaces.Copyable;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -57,5 +58,10 @@ public class SecuredProxy extends Proxy {
     @Override
     public final String toString() {
         return getIpAddress() + ":" + getPort() + ":" + username;
+    }
+
+    @Override
+    public SecuredProxy createCopy() {
+        return new SecuredProxy(getIpAddress(), getPort(), getUsername(), getPassword());
     }
 }

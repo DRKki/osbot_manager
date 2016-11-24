@@ -1,6 +1,7 @@
 package bot_parameters.proxy;
 
 import bot_parameters.interfaces.BotParameter;
+import bot_parameters.interfaces.Copyable;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -9,7 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public class Proxy implements BotParameter, Serializable {
+public class Proxy implements BotParameter, Copyable<Proxy>, Serializable {
 
     private static final long serialVersionUID = -6367454010350132779L;
 
@@ -53,5 +54,10 @@ public class Proxy implements BotParameter, Serializable {
     @Override
     public String toString() {
         return ipAddress.get() + ":" + port.get();
+    }
+
+    @Override
+    public Proxy createCopy() {
+        return new Proxy(getIpAddress(), getPort());
     }
 }

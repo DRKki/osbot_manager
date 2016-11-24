@@ -1,18 +1,26 @@
 package gui.tabs;
 
+import bot_parameters.interfaces.BotParameter;
+import bot_parameters.interfaces.Copyable;
 import gui.dialogues.input_dialog.InputDialog;
 import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 
-public class TableTab<T> extends Tab {
+public class TableTab<T extends Copyable<T>> extends Tab {
 
     private final TableView<T> tableView;
     final ToolBar toolBar;
     final ContextMenu contextMenu;
     private final InputDialog<T> inputDialog;
+    private T copiedItem;
 
     TableTab(final String text, final String placeholder, final InputDialog<T> inputDialog) {
 
@@ -60,6 +68,14 @@ public class TableTab<T> extends Tab {
         editButton.setOnAction(e -> onEdit());
         toolBar.getItems().add(editButton);
 
+        Button copyButton = new Button("Copy");
+        copyButton.setOnAction(e -> onCopy());
+        toolBar.getItems().add(copyButton);
+
+        Button pasteButton = new Button("Paste");
+        pasteButton.setOnAction(e -> onPaste());
+        toolBar.getItems().add(pasteButton);
+
         Button removeButton = new Button("Remove");
         removeButton.setOnAction(e -> onRemove());
         toolBar.getItems().add(removeButton);
@@ -95,11 +111,31 @@ public class TableTab<T> extends Tab {
         editOption.setOnAction(e -> onEdit());
         contextMenu.getItems().add(editOption);
 
+        MenuItem copyOption = new MenuItem("Copy");
+        copyOption.setOnAction(event -> onCopy());
+        contextMenu.getItems().add(copyOption);
+
+        MenuItem pasteOption = new MenuItem("Paste");
+        pasteOption.setOnAction(e -> onPaste());
+        contextMenu.getItems().add(pasteOption);
+
         MenuItem removeOption = new MenuItem("Remove");
         removeOption.setOnAction(e -> onRemove());
         contextMenu.getItems().add(removeOption);
 
         getTableView().contextMenuProperty().set(contextMenu);
+
+        getTableView().setOnKeyPressed(event -> {
+            if (event.isControlDown()) {
+                if (event.getCode() == KeyCode.C) {
+                    onCopy();
+                } else if (event.getCode() == KeyCode.V) {
+                    onPaste();
+                }
+            } else if (event.getCode() == KeyCode.DELETE) {
+                onRemove();
+            }
+        });
     }
 
     public final TableView<T> getTableView() {
@@ -116,6 +152,16 @@ public class TableTab<T> extends Tab {
         if(selectedIndex > -1) {
             inputDialog.setExistingItem(tableView.getSelectionModel().getSelectedItem());
             inputDialog.showAndWait().ifPresent(editedItem -> tableView.refresh());
+        }
+    }
+
+    private void onCopy() {
+        copiedItem = getTableView().getSelectionModel().getSelectedItem();
+    }
+
+    private void onPaste() {
+        if (copiedItem != null) {
+            getTableView().getItems().add(copiedItem.createCopy());
         }
     }
 

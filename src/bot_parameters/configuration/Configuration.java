@@ -2,12 +2,14 @@ package bot_parameters.configuration;
 
 import bot_parameters.account.RunescapeAccount;
 import bot_parameters.interfaces.BotParameter;
+import bot_parameters.interfaces.Copyable;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import jdk.nashorn.internal.runtime.regexp.joni.Config;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-public final class Configuration implements BotParameter, Serializable {
+public final class Configuration implements BotParameter, Copyable<Configuration>, Serializable {
 
     private static final long serialVersionUID = 1938451332017337304L;
 
@@ -218,5 +220,26 @@ public final class Configuration implements BotParameter, Serializable {
             e.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Configuration createCopy() {
+        Configuration configurationCopy = new Configuration(
+                runescapeAccount.get().createCopy(),
+                script.get().createCopy()
+        );
+        configurationCopy.setProxy(getProxy().createCopy());
+        configurationCopy.setMemoryAllocation(getMemoryAllocation());
+        configurationCopy.setCollectData(isCollectData());
+        configurationCopy.setDebugMode(isDebugMode());
+        configurationCopy.setDebugPort(getDebugPort());
+        configurationCopy.setLowCpuMode(isLowCpuMode());
+        configurationCopy.setLowResourceMode(isLowResourceMode());
+        configurationCopy.setWorldType(getWorldType());
+        configurationCopy.setWorld(getWorld());
+        configurationCopy.setRandomizeWorld(isRandomizeWorld());
+        configurationCopy.setReflection(isReflection());
+        configurationCopy.setNoRandoms(isNoRandoms());
+        return configurationCopy;
     }
 }

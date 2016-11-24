@@ -1,6 +1,7 @@
 package bot_parameters.script;
 
 import bot_parameters.interfaces.BotParameter;
+import bot_parameters.interfaces.Copyable;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -9,7 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public final class Script implements BotParameter, Serializable {
+public final class Script implements BotParameter, Copyable<Script>, Serializable {
 
     private static final long serialVersionUID = -3697946363287646016L;
 
@@ -65,5 +66,10 @@ public final class Script implements BotParameter, Serializable {
     @Override
     public final String toString() {
         return scriptIdentifier.get();
+    }
+
+    @Override
+    public Script createCopy() {
+        return new Script(getScriptIdentifier(), getParameters(), isLocal());
     }
 }
