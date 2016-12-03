@@ -1,13 +1,13 @@
 package gui.dialogues.input_dialog;
 
+import bot_parameters.proxy.Proxy;
+import bot_parameters.proxy.SecuredProxy;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
-import bot_parameters.proxy.Proxy;
-import bot_parameters.proxy.SecuredProxy;
 
 public final class ProxyDialog extends InputDialog<Proxy> {
 

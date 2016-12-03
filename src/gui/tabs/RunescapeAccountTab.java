@@ -1,11 +1,13 @@
 package gui.tabs;
 
 import bot_parameters.account.RunescapeAccount;
+import gui.ToolbarButton;
 import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.RunescapeAccountDialog;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.ToolBar;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 
@@ -30,10 +32,11 @@ public class RunescapeAccountTab extends TableTab<RunescapeAccount> {
 
         getTableView().getColumns().addAll(usernameCol, passwordCol, pinCol);
 
-        Button importFromFileButton = new Button("Import");
-        importFromFileButton.setMnemonicParsing(false);
+        toolBar.getChildren().add(new Separator(Orientation.VERTICAL));
+
+        Button importFromFileButton = new ToolbarButton("Import", "import_icon.png", "import_icon_blue.png");
         importFromFileButton.setOnAction(e -> importFromFile());
-        toolBar.getItems().add(importFromFileButton);
+        toolBar.getChildren().add(importFromFileButton);
     }
 
     private void importFromFile() {

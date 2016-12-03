@@ -1,14 +1,14 @@
 package gui.dialogues.input_dialog;
 
+import bot_parameters.account.RunescapeAccount;
+import bot_parameters.configuration.Configuration;
 import bot_parameters.configuration.WorldType;
+import bot_parameters.proxy.Proxy;
+import bot_parameters.script.Script;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
-import bot_parameters.account.RunescapeAccount;
-import bot_parameters.configuration.Configuration;
-import bot_parameters.proxy.Proxy;
-import bot_parameters.script.Script;
 
 public final class ConfigurationDialog extends InputDialog<Configuration> {
 

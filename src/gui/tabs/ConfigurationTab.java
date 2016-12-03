@@ -8,11 +8,13 @@ import bot_parameters.script.Script;
 import exceptions.ClientOutOfDateException;
 import exceptions.IncorrectLoginException;
 import exceptions.MissingWebWalkDataException;
+import gui.ToolbarButton;
 import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ConfigurationDialog;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.geometry.Orientation;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import script_executor.ScriptExecutor;
@@ -30,13 +32,13 @@ public class ConfigurationTab extends TableTab<Configuration> {
 
         this.botSettingsTab = botSettingsTab;
 
-        startButton = new Button("Start");
-        startButton.setMnemonicParsing(false);
-        toolBar.getItems().add(startButton);
+        toolBar.getChildren().add(new Separator(Orientation.VERTICAL));
 
-        startAllButton = new Button("Start All");
-        startAllButton.setMnemonicParsing(false);
-        toolBar.getItems().add(startAllButton);
+        startButton = new ToolbarButton("Start", "start_icon.png", "start_icon_blue.png");
+        toolBar.getChildren().add(startButton);
+
+        startAllButton = new ToolbarButton("Start All", "start_all_icon.png", "start_all_icon_blue.png");
+        toolBar.getChildren().add(startAllButton);
 
         startButton.setOnAction(e -> {
             startButton.setDisable(true);
@@ -47,8 +49,8 @@ public class ConfigurationTab extends TableTab<Configuration> {
         startAllButton.setOnAction(e -> {
             startAllButton.setDisable(true);
             startButton.setDisable(true);
-            startAll();})
-        ;
+            startAll();
+        });
 
         TableColumn<Configuration, Script> scriptCol = new TableColumn<>("Script");
         scriptCol.setCellValueFactory(new PropertyValueFactory<>("script"));

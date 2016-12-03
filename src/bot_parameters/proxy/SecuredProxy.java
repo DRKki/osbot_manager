@@ -1,6 +1,5 @@
 package bot_parameters.proxy;
 
-import bot_parameters.interfaces.Copyable;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 

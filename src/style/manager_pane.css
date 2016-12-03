@@ -1,12 +1,12 @@
 .button {
     -fx-background-color: #3C3C3C;
     -fx-text-fill: #FFFFFF;
-    -fx-border-color: #FFFFFF;
+    -fx-border-width: 0 0 0 0;
+    -fx-padding:0;
 }
 
 .button:hover {
-    -fx-background-color: #FFFFFF;
-    -fx-text-fill: #000000;
+    -fx-text-fill: #33b5e5;
 }
 
 ManagerPane, ToolBar {

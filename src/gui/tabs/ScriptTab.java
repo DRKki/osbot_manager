@@ -3,7 +3,6 @@ package gui.tabs;
 import bot_parameters.script.Script;
 import gui.dialogues.input_dialog.ScriptDialog;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.ToolBar;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public class ScriptTab extends TableTab<Script> {

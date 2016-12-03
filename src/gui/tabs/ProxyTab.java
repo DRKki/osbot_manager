@@ -2,11 +2,13 @@ package gui.tabs;
 
 import bot_parameters.proxy.Proxy;
 import bot_parameters.proxy.SecuredProxy;
+import gui.ToolbarButton;
 import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ProxyDialog;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.ToolBar;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 
@@ -34,10 +36,11 @@ public class ProxyTab extends TableTab<Proxy> {
 
         getTableView().getColumns().addAll(ipCol, portCol, usernameCol, passwordCol);
 
-        Button importFromFileButton = new Button("Import");
-        importFromFileButton.setMnemonicParsing(false);
+        toolBar.getChildren().add(new Separator(Orientation.VERTICAL));
+
+        Button importFromFileButton = new ToolbarButton("Import", "import_icon.png", "import_icon_blue.png");
         importFromFileButton.setOnAction(e -> importFromFile());
-        toolBar.getItems().add(importFromFileButton);
+        toolBar.getChildren().add(importFromFileButton);
     }
 
     private void importFromFile() {

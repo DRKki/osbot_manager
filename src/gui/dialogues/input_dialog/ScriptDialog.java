@@ -1,21 +1,15 @@
 package gui.dialogues.input_dialog;
 
+import bot_parameters.script.Script;
 import bot_parameters.script.ScriptType;
 import file_manager.LocalScriptLoader;
-import gui.dialogues.error_dialog.ExceptionDialog;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import bot_parameters.script.Script;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-
-import java.awt.*;
-import java.util.List;
 
 public final class ScriptDialog extends InputDialog<Script> {
 

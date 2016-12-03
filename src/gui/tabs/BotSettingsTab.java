@@ -1,12 +1,12 @@
 package gui.tabs;
 
+import bot_parameters.account.OSBotAccount;
+import bot_parameters.bot.Bot;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
-import bot_parameters.account.OSBotAccount;
-import bot_parameters.bot.Bot;
 
 import java.io.File;
 

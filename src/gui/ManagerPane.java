@@ -9,8 +9,8 @@ import file_manager.SettingsFileManager;
 import gui.tabs.*;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -28,7 +28,7 @@ public class ManagerPane extends BorderPane {
 
     public ManagerPane() {
 
-        ToolBar topToolBar = new ToolBar();
+        HBox topToolBar = new HBox(15);
         topToolBar.setPadding(new Insets(10, 10, 10, 10));
 
         Font titleFont = new Font("Arial", 22);
@@ -43,17 +43,19 @@ public class ManagerPane extends BorderPane {
 
         TextFlow title = new TextFlow(titleText1, titleText2);
 
-        topToolBar.getItems().add(title);
+        topToolBar.getChildren().add(title);
 
         Pane spacer = new Pane();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        topToolBar.getItems().add(spacer);
+        topToolBar.getChildren().add(spacer);
 
-        Button saveButton = new Button("Save");
-        topToolBar.getItems().add(saveButton);
+        Button saveButton = new ToolbarButton("Save", "save_icon.png", "save_icon_blue.png");
+        saveButton.setContentDisplay(ContentDisplay.LEFT);
+        topToolBar.getChildren().add(saveButton);
 
-        Button loadButton = new Button("Load");
-        topToolBar.getItems().add(loadButton);
+        Button loadButton = new ToolbarButton("Load", "open_icon.png", "open_icon_blue.png");
+        loadButton.setContentDisplay(ContentDisplay.LEFT);
+        topToolBar.getChildren().add(loadButton);
 
         setTop(topToolBar);
 

@@ -1,23 +1,18 @@
 package gui.tabs;
 
-import bot_parameters.interfaces.BotParameter;
 import bot_parameters.interfaces.Copyable;
+import gui.ToolbarButton;
 import gui.dialogues.input_dialog.InputDialog;
 import javafx.collections.ListChangeListener;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 
 public class TableTab<T extends Copyable<T>> extends Tab {
 
     private final TableView<T> tableView;
-    final ToolBar toolBar;
+    final HBox toolBar;
     final ContextMenu contextMenu;
     private final InputDialog<T> inputDialog;
     private T copiedItem;
@@ -53,33 +48,29 @@ public class TableTab<T extends Copyable<T>> extends Tab {
 
         borderPane.setCenter(tableView);
 
-        toolBar = new ToolBar();
+        toolBar = new HBox(15);
         toolBar.setPadding(new Insets(10, 10, 10, 10));
 
         Pane spacer = new Pane();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        toolBar.getItems().add(spacer);
+        toolBar.getChildren().add(spacer);
 
-        Button addButton = new Button("Add");
+        Button addButton = new ToolbarButton("Add", "add_icon.png", "add_icon_blue.png");
         addButton.setOnAction(e -> onAdd());
-        toolBar.getItems().add(addButton);
 
-        Button editButton = new Button("Edit");
+        Button editButton = new ToolbarButton("Edit", "edit_icon.png", "edit_icon_blue.png");
         editButton.setOnAction(e -> onEdit());
-        toolBar.getItems().add(editButton);
 
-        Button copyButton = new Button("Copy");
-        copyButton.setOnAction(e -> onCopy());
-        toolBar.getItems().add(copyButton);
-
-        Button pasteButton = new Button("Paste");
-        pasteButton.setOnAction(e -> onPaste());
-        toolBar.getItems().add(pasteButton);
-
-        Button removeButton = new Button("Remove");
+        Button removeButton = new ToolbarButton("Remove", "delete_icon.png", "delete_icon_blue.png");
         removeButton.setOnAction(e -> onRemove());
-        toolBar.getItems().add(removeButton);
 
+        Button copyButton = new ToolbarButton("Copy", "copy_icon.png", "copy_icon_blue.png");
+        copyButton.setOnAction(e -> onCopy());
+
+        Button pasteButton = new ToolbarButton("Paste", "paste_icon.png", "paste_icon_blue.png");
+        pasteButton.setOnAction(e -> onPaste());
+
+        toolBar.getChildren().addAll(addButton, editButton, removeButton, copyButton, pasteButton);
         borderPane.setBottom(toolBar);
 
         AnchorPane.setBottomAnchor(borderPane, 0.0);
