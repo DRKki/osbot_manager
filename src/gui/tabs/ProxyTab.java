@@ -57,7 +57,7 @@ public class ProxyTab extends TableTab<Proxy> {
                 String line;
                 while((line = br.readLine()) != null) {
 
-                    String[] values = line.split(":");
+                    String[] values = line.trim().split(":");
 
                     if (values.length < 2) {
                         new ExceptionDialog(new Exception("The proxy: " + line + " is missing values, skipping.")).show();

@@ -53,7 +53,7 @@ public class RunescapeAccountTab extends TableTab<RunescapeAccount> {
                 String line;
                 while((line = br.readLine()) != null) {
 
-                    String[] values = line.split(":");
+                    String[] values = line.trim().split(":");
 
                     if (values.length < 2) {
                         new ExceptionDialog(new Exception("The account: " + line + " is missing values, skipping.")).show();
