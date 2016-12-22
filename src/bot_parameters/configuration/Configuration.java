@@ -9,7 +9,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -36,6 +35,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
     private SimpleBooleanProperty lowResourceMode = new SimpleBooleanProperty();
     private SimpleBooleanProperty reflection = new SimpleBooleanProperty();
     private SimpleBooleanProperty noRandoms = new SimpleBooleanProperty();
+    private SimpleBooleanProperty noInterface = new SimpleBooleanProperty();
     private SimpleObjectProperty<WorldType> worldType = new SimpleObjectProperty<>();
     private SimpleIntegerProperty world = new SimpleIntegerProperty(-1);
     private SimpleBooleanProperty randomizeWorld = new SimpleBooleanProperty();
@@ -87,6 +87,8 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
     public final boolean isNoRandoms() { return noRandoms.get(); }
 
+    public final boolean isNoInterface() { return noInterface.get(); }
+
     public final WorldType getWorldType() { return worldType.get(); }
 
     public final Integer getWorld() { return world.get(); }
@@ -125,6 +127,8 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
     public final void setNoRandoms(final boolean noRandoms) { this.noRandoms.set(noRandoms); }
 
+    public final void setNoInterface(final boolean noInterface) { this.noInterface.set(noInterface); }
+
     public final void setWorldType(final WorldType worldType) { this.worldType.set(worldType); }
 
     public final void setWorld(final Integer world) { this.world.set(world); }
@@ -152,6 +156,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         stream.writeBoolean(isRandomizeWorld());
         stream.writeBoolean(isReflection());
         stream.writeBoolean(isNoRandoms());
+        stream.writeBoolean(isNoInterface());
     }
 
     private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {
@@ -174,6 +179,12 @@ public final class Configuration implements BotParameter, Copyable<Configuration
             System.out.println("Config does not contain new allow options, skipping");
             reflection = new SimpleBooleanProperty();
             noRandoms = new SimpleBooleanProperty();
+        }
+        try {
+            noInterface = new SimpleBooleanProperty(stream.readBoolean());
+        } catch (Exception e) {
+            System.out.println("Config does not contain new nointerface option, skipping");
+            noInterface = new SimpleBooleanProperty();
         }
         isRunning = new SimpleBooleanProperty();
     }
@@ -199,6 +210,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         if (lowCpuMode.get()) allowParams.add("lowcpu");
         if (reflection.get()) allowParams.add("reflection");
         if (noRandoms.get()) allowParams.add("norandoms");
+        if (noInterface.get()) allowParams.add("nointerface");
 
         if (!allowParams.isEmpty()) {
             parameterString += " -allow " + String.join(",", allowParams);

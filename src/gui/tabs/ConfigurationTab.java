@@ -94,7 +94,10 @@ public class ConfigurationTab extends TableTab<Configuration> {
         TableColumn<Configuration, Boolean> noRandomsCol = new TableColumn<>("No Randoms");
         noRandomsCol.setCellValueFactory(new PropertyValueFactory<>("noRandoms"));
 
-        getTableView().getColumns().addAll(scriptCol, accountCol, worldTypeCol, randomWorldCol, worldCol, proxyCol, memoryCol, collectDataCol, debugModeCol, debugPortCol, lowCpuCol, lowResCol, reflectionCol, noRandomsCol);
+        TableColumn<Configuration, Boolean> noInterfaceCol = new TableColumn<>("No Interface");
+        noInterfaceCol.setCellValueFactory(new PropertyValueFactory<>("noInterface"));
+
+        getTableView().getColumns().addAll(scriptCol, accountCol, worldTypeCol, randomWorldCol, worldCol, proxyCol, memoryCol, collectDataCol, debugModeCol, debugPortCol, lowCpuCol, lowResCol, reflectionCol, noRandomsCol, noInterfaceCol);
 
         getTableView().setRowFactory(param -> {
 

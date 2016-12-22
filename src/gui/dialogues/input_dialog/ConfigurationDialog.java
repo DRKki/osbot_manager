@@ -23,6 +23,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
     private final CheckBox lowCpuMode;
     private final CheckBox enableReflection;
     private final CheckBox noRandoms;
+    private final CheckBox noInterface;
     private final ChoiceBox<WorldType> worldTypeSelector;
     private final CheckBox randomizeWorld;
     private final ChoiceBox<Integer> worldSelector;
@@ -57,6 +58,8 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         enableReflection = new CheckBox("Reflection");
 
         noRandoms = new CheckBox("No randoms");
+
+        noInterface = new CheckBox("No interface");
 
         worldTypeSelector = new ChoiceBox<>(FXCollections.observableArrayList(WorldType.values()));
 
@@ -95,6 +98,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         grid.add(lowCpuMode, 1, 8);
         grid.add(enableReflection, 1, 9);
         grid.add(noRandoms, 1, 10);
+        grid.add(noInterface, 1, 11);
 
         accountSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
             okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null ||
@@ -126,6 +130,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
             worldTypeSelector.getSelectionModel().select(WorldType.F2P);
             worldSelector.getSelectionModel().select(0);
             randomizeWorld.setSelected(false);
+            noInterface.setSelected(false);
             return;
         }
         accountSelector.setValue(existingItem.getRunescapeAccount());
@@ -142,6 +147,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         worldTypeSelector.getSelectionModel().select(existingItem.getWorldType());
         worldSelector.getSelectionModel().select(existingItem.getWorld());
         randomizeWorld.setSelected(existingItem.isRandomizeWorld());
+        noInterface.setSelected(existingItem.isNoInterface());
     }
 
     @Override
@@ -165,6 +171,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         configuration.setWorldType(worldTypeSelector.getValue());
         configuration.setWorld(worldSelector.getValue());
         configuration.setRandomizeWorld(randomizeWorld.isSelected());
+        configuration.setNoInterface(noInterface.isSelected());
 
         return configuration;
     }
@@ -194,6 +201,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         existingItem.setWorldType(worldTypeSelector.getValue());
         existingItem.setWorld(worldSelector.getValue());
         existingItem.setRandomizeWorld(randomizeWorld.isSelected());
+        existingItem.setNoInterface(noInterface.isSelected());
         return existingItem;
     }
 }
