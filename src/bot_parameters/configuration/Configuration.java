@@ -1,31 +1,34 @@
 package bot_parameters.configuration;
 
+import bot_parameters.account.OSBotAccount;
 import bot_parameters.account.RunescapeAccount;
 import bot_parameters.interfaces.BotParameter;
 import bot_parameters.interfaces.Copyable;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
+import exceptions.ClientOutOfDateException;
+import exceptions.IncorrectLoginException;
+import exceptions.MissingWebWalkDataException;
+import gui.dialogues.error_dialog.ExceptionDialog;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 public final class Configuration implements BotParameter, Copyable<Configuration>, Serializable {
 
     private static final long serialVersionUID = 1938451332017337304L;
 
     private SimpleObjectProperty<RunescapeAccount> runescapeAccount;
-    private SimpleObjectProperty<Script> script;
+    private SimpleListProperty<Script> scripts;
     private SimpleObjectProperty<Proxy> proxy;
     private SimpleIntegerProperty memoryAllocation = new SimpleIntegerProperty(-1);
     private SimpleBooleanProperty collectData = new SimpleBooleanProperty();
@@ -41,24 +44,18 @@ public final class Configuration implements BotParameter, Copyable<Configuration
     private SimpleBooleanProperty randomizeWorld = new SimpleBooleanProperty();
     private SimpleBooleanProperty isRunning = new SimpleBooleanProperty();
 
-    private Process process;
-
-    public Configuration(final RunescapeAccount runescapeAccount, final Script script) {
+    public Configuration(final RunescapeAccount runescapeAccount, final ObservableList<Script> scripts) {
         this.runescapeAccount = new SimpleObjectProperty<>(runescapeAccount);
-        this.script = new SimpleObjectProperty<>(script);
+        this.scripts = new SimpleListProperty<>(scripts);
         this.proxy = new SimpleObjectProperty<>(new Proxy("No Proxy", -1));
     }
-
-    public Process getProcess() { return process; }
-
-    public void setProcess(final Process process) { this.process = process; }
 
     public RunescapeAccount getRunescapeAccount() {
         return runescapeAccount.get();
     }
 
-    public final Script getScript() {
-        return script.get();
+    public final ObservableList<Script> getScripts() {
+        return scripts.get();
     }
 
     public final Proxy getProxy() {
@@ -97,7 +94,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
     public final void setRunescapeAccount(final RunescapeAccount runescapeAccount) { this.runescapeAccount.set(runescapeAccount); }
 
-    public final void setScript(final Script script) { this.script.set(script); }
+    public final void setScripts(final ObservableList<Script> scripts) { this.scripts.set(scripts); }
 
     public final void setProxy(final Proxy proxy) {
         this.proxy.set(proxy);
@@ -143,7 +140,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeObject(getRunescapeAccount());
-        stream.writeObject(getScript());
+        stream.writeObject(new ArrayList<>(getScripts()));
         stream.writeObject(getProxy());
         stream.writeInt(getMemoryAllocation());
         stream.writeBoolean(isCollectData());
@@ -161,7 +158,14 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
     private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {
         runescapeAccount = new SimpleObjectProperty<>((RunescapeAccount) stream.readObject());
-        script = new SimpleObjectProperty<>((Script) stream.readObject());
+        Object scriptObj = stream.readObject();
+        if (scriptObj instanceof Script) {
+            List<Script> scriptList = new ArrayList<>();
+            scriptList.add((Script) scriptObj);
+            scripts = new SimpleListProperty<>(FXCollections.observableArrayList(scriptList));
+        } else {
+            scripts = new SimpleListProperty<>(FXCollections.observableArrayList((List<Script>) scriptObj));
+        }
         proxy = new SimpleObjectProperty<>((Proxy) stream.readObject());
         memoryAllocation = new SimpleIntegerProperty(stream.readInt());
         collectData = new SimpleBooleanProperty(stream.readBoolean());
@@ -191,7 +195,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
     @Override
     public final String toParameterString() {
-        String parameterString = String.join(" ", runescapeAccount.get().toParameterString(), script.get().toParameterString());
+        String parameterString = runescapeAccount.get().toParameterString();
         if (proxy != null) parameterString += " " + proxy.get().toParameterString();
         if (memoryAllocation.get() != -1) parameterString += " -mem " + memoryAllocation.get();
         if (collectData.get()) parameterString += " -data 1";
@@ -237,10 +241,10 @@ public final class Configuration implements BotParameter, Copyable<Configuration
     @Override
     public Configuration createCopy() {
         Configuration configurationCopy = new Configuration(
-                runescapeAccount.get().createCopy(),
-                script.get().createCopy()
+                runescapeAccount.get(),
+                scripts.get()
         );
-        configurationCopy.setProxy(getProxy().createCopy());
+        configurationCopy.setProxy(getProxy());
         configurationCopy.setMemoryAllocation(getMemoryAllocation());
         configurationCopy.setCollectData(isCollectData());
         configurationCopy.setDebugMode(isDebugMode());
@@ -253,5 +257,145 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         configurationCopy.setReflection(isReflection());
         configurationCopy.setNoRandoms(isNoRandoms());
         return configurationCopy;
+    }
+
+    public void run(final String osbotPath, final OSBotAccount osBotAccount) {
+        Thread runThread = new Thread(() -> {
+
+            for (final Script script : scripts.get()) {
+
+                List<String> command = new ArrayList<>();
+
+                Collections.addAll(command, "java", "-jar", osbotPath);
+                Collections.addAll(command, osBotAccount.toParameterString().split(" "));
+                Collections.addAll(command, this.toParameterString().split(" "));
+                Collections.addAll(command, script.toParameterString().split(" "));
+
+                try {
+
+                    final ProcessBuilder processBuilder = new ProcessBuilder(command);
+                    processBuilder.redirectErrorStream(true);
+                    final Process process = processBuilder.start();
+
+                    setRunning(true);
+
+                    List<Integer> javaPIDs = getJavaPIDs();
+
+                    int processID = -1;
+
+                    try (final InputStream stdout = process.getInputStream();
+                         final InputStreamReader inputStreamReader = new InputStreamReader(stdout);
+                         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+
+                        String outputLine;
+                        while ((outputLine = bufferedReader.readLine()) != null) {
+
+                            outputLine = outputLine.trim();
+
+                            System.out.println(outputLine);
+
+                            if (outputLine.toLowerCase().contains("client is out of date")) {
+                                Platform.runLater(() -> new ExceptionDialog(new ClientOutOfDateException()).show());
+                                setRunning(false);
+                                return;
+                            } else if (outputLine.toLowerCase().contains("update web walking")) {
+                                Platform.runLater(() -> new ExceptionDialog(new MissingWebWalkDataException()).show());
+                                setRunning(false);
+                                return;
+                            } else if (outputLine.toLowerCase().contains("invalid username or password")) {
+                                Platform.runLater(() -> new ExceptionDialog(new IncorrectLoginException()).show());
+                                setRunning(false);
+                                return;
+                            } else if (outputLine.contains("OSBot is now ready!")) {
+                                List<Integer> newJavaPIDs = getJavaPIDs();
+                                newJavaPIDs.removeAll(javaPIDs);
+
+                                if (newJavaPIDs.size() == 1) {
+                                    processID = newJavaPIDs.get(0);
+                                }
+                            } else if (outputLine.contains("Bot exited") || (outputLine.contains("Script") && outputLine.endsWith("has exited!"))) {
+                                break;
+                            }
+                        }
+                    }
+
+                    System.out.println("Reached");
+                    if (processID != -1) {
+                        System.out.println("Killing");
+                        killProcess(processID);
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                setRunning(false);
+            }
+        });
+        runThread.start();
+    }
+
+    private List<Integer> getJavaPIDs() {
+        if (System.getProperty("os.name").startsWith("Windows")) {
+            return getJavaPIDsWindows();
+        } else {
+            return getJavaPIDsLinux();
+        }
+    }
+
+    private List<Integer> getJavaPIDsWindows()  {
+        List<Integer> pids = new ArrayList<>();
+        try {
+            Process process = Runtime.getRuntime().exec("tasklist /FI \"IMAGENAME eq java.exe\" /NH");
+            try (final InputStream stdout = process.getInputStream();
+                 final InputStreamReader inputStreamReader = new InputStreamReader(stdout);
+                 final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+                String processInfo;
+                while ((processInfo = bufferedReader.readLine()) != null) {
+                    processInfo = processInfo.trim();
+                    String[] values = processInfo.split("\\s+");
+                    if (values.length >= 2) {
+                        pids.add(Integer.parseInt(values[1]));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return pids;
+    }
+
+    private List<Integer> getJavaPIDsLinux()  {
+        List<Integer> pids = new ArrayList<>();
+        try {
+            Process process = Runtime.getRuntime().exec("ps aux | grep java");
+            try (final InputStream stdout = process.getInputStream();
+                 final InputStreamReader inputStreamReader = new InputStreamReader(stdout);
+                 final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+                String processInfo;
+                while ((processInfo = bufferedReader.readLine()) != null) {
+                    processInfo = processInfo.trim();
+                    String[] values = processInfo.split("\\s+");
+                    if (values.length > 0) {
+                        pids.add(Integer.parseInt(values[0]));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return pids;
+    }
+
+    private void killProcess(final int PID) {
+        try {
+            if (System.getProperty("os.name").startsWith("Windows")) {
+                Runtime.getRuntime().exec("Taskkill /PID " + PID + " /F");
+            } else {
+                Runtime.getRuntime().exec("kill -9 " + PID);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

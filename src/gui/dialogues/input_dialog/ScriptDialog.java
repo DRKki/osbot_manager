@@ -90,6 +90,7 @@ public final class ScriptDialog extends InputDialog<Script> {
         if(existingItem == null) {
             scriptIdentifierField.setText("");
             scriptParameters.setText("");
+            okButton.setDisable(true);
             return;
         }
         if(existingItem.isLocal()) {
@@ -102,11 +103,13 @@ public final class ScriptDialog extends InputDialog<Script> {
                     break;
                 }
             }
+            okButton.setDisable(false);
         } else {
             if(scriptTypeSelector.getValue() != ScriptType.SDN) {
                 scriptTypeSelector.setValue(ScriptType.SDN);
             }
             scriptIdentifierField.setText(existingItem.getScriptIdentifier().trim());
+            if (!validateSDNScriptID()) okButton.setDisable(true);
         }
         scriptParameters.setText(existingItem.getParameters().trim());
     }

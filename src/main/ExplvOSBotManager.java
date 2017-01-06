@@ -1,3 +1,5 @@
+package main;
+
 import gui.ManagerPane;
 import javafx.application.Application;
 import javafx.geometry.Insets;

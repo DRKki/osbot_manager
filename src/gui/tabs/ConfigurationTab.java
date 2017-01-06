@@ -5,19 +5,13 @@ import bot_parameters.configuration.Configuration;
 import bot_parameters.configuration.WorldType;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
-import exceptions.ClientOutOfDateException;
-import exceptions.IncorrectLoginException;
-import exceptions.MissingWebWalkDataException;
 import gui.ToolbarButton;
-import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ConfigurationDialog;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.geometry.Orientation;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import script_executor.ScriptExecutor;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,8 +46,8 @@ public class ConfigurationTab extends TableTab<Configuration> {
             startAll();
         });
 
-        TableColumn<Configuration, Script> scriptCol = new TableColumn<>("Script");
-        scriptCol.setCellValueFactory(new PropertyValueFactory<>("script"));
+        TableColumn<Configuration, ObservableList<Script>> scriptCol = new TableColumn<>("Scripts");
+        scriptCol.setCellValueFactory(new PropertyValueFactory<>("scripts"));
 
         TableColumn<Configuration, RunescapeAccount> accountCol = new TableColumn<>("Account");
         accountCol.setCellValueFactory(new PropertyValueFactory<>("runescapeAccount"));
@@ -118,25 +112,6 @@ public class ConfigurationTab extends TableTab<Configuration> {
             return row;
         });
 
-        Thread processChecker = new Thread(new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                while(true) {
-                    getTableView().getItems()
-                                  .stream()
-                                  .filter(Configuration::isRunning)
-                                  .filter(configuration -> !configuration.getProcess().isAlive())
-                                  .forEach(configuration -> {
-                                      configuration.setRunning(false);
-                                      configuration.setProcess(null);
-                    });
-                    Thread.sleep(1000);
-                }
-            }
-        });
-        processChecker.setDaemon(true);
-        processChecker.start();
-
         MenuItem startOption = new MenuItem("Start");
         startOption.setOnAction(e -> start());
         contextMenu.getItems().add(startOption);
@@ -151,24 +126,25 @@ public class ConfigurationTab extends TableTab<Configuration> {
     }
 
     private void runConfigurations(final List<Configuration> configurations) {
-        int delay = 0;
-        if (configurations.size() > 1) {
-            Optional<Integer> userDelayVal = getDelayFromUser();
-            if (userDelayVal.isPresent()){
-                delay = userDelayVal.get();
+        final int delay = configurations.size() > 1 ? getDelayFromUser() : 0;
+
+        new Thread(() -> {
+            for (final Configuration configuration : configurations) {
+                configuration.run(botSettingsTab.getBot().getOsbotPath(), botSettingsTab.getOsBotAccount());
+                try {
+                    Thread.sleep(delay * 1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        Thread executorThread = new Thread(new ConfigurationExecutor(configurations, delay, () -> {
             Platform.runLater(() -> {
                 startAllButton.setDisable(false);
                 startButton.setDisable(false);
             });
-        }));
-        executorThread.setDaemon(true);
-        executorThread.start();
+        }).start();
     }
 
-    private Optional<Integer> getDelayFromUser() {
+    private Integer getDelayFromUser() {
         TextInputDialog delayDialog = new TextInputDialog("5");
         delayDialog.setTitle("Explv's OSBot Manager");
         delayDialog.setHeaderText("Set delay between bot starts");
@@ -177,48 +153,8 @@ public class ConfigurationTab extends TableTab<Configuration> {
         Optional<String> delayText = delayDialog.showAndWait();
 
         if (delayText.isPresent()) {
-            return Optional.of(Integer.parseInt(delayText.get()));
+            return Integer.parseInt(delayText.get());
         }
-        return Optional.empty();
-    }
-
-    private class ConfigurationExecutor extends Task<Void> {
-
-        private final List<Configuration> configurations;
-        private final int delay;
-        private final ConfigurationExecuteCallback callback;
-
-        ConfigurationExecutor(final List<Configuration> configurations, final int delay, final ConfigurationExecuteCallback callback) {
-            this.configurations = configurations;
-            this.delay = delay;
-            this.callback = callback;
-        }
-
-        @Override
-        protected Void call() {
-            for (final Configuration configuration : configurations) {
-                try {
-                    ScriptExecutor.execute(botSettingsTab.getBot().getOsbotPath(), botSettingsTab.getOsBotAccount(), configuration).ifPresent(process -> {
-                        Platform.runLater(() -> {
-                            configuration.setProcess(process);
-                            configuration.setRunning(true);
-                        });
-                    });
-                } catch (ClientOutOfDateException | MissingWebWalkDataException | IncorrectLoginException | InterruptedException e) {
-                    Platform.runLater(() -> new ExceptionDialog(new Exception(e.getMessage())).showAndWait());
-                }
-                try {
-                    Thread.sleep(delay);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            callback.onComplete();
-            return null;
-        }
-    }
-
-    private interface ConfigurationExecuteCallback {
-        void onComplete();
+        return 0;
     }
 }

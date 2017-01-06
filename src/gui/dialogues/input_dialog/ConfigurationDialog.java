@@ -6,14 +6,20 @@ import bot_parameters.configuration.WorldType;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+
+import java.util.List;
 
 public final class ConfigurationDialog extends InputDialog<Configuration> {
 
     private final ChoiceBox<RunescapeAccount> accountSelector;
     private final ChoiceBox<Script> scriptSelector;
+    private final ListView<Script> selectedScripts;
     private final ChoiceBox<Proxy> proxySelector;
     private final TextField memoryAllocation;
     private final CheckBox collectData;
@@ -36,6 +42,8 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         accountSelector = new ChoiceBox<>(accountList);
 
         scriptSelector = new ChoiceBox<>(scriptList);
+
+        selectedScripts = new ListView<>();
 
         proxySelector = new ChoiceBox<>(proxyList);
 
@@ -76,38 +84,56 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         grid.add(new Label("Account:"), 0, 0);
         grid.add(accountSelector, 1, 0);
 
-        grid.add(new Label("Script:"), 0, 1);
-        grid.add(scriptSelector, 1, 1);
+        grid.add(new Label("Scripts"), 0, 1);
 
-        grid.add(new Label("World Type: "), 0, 2);
-        grid.add(worldTypeSelector, 1, 2);
-        grid.add(randomizeWorld, 2, 2);
-        grid.add(new Label("World: "), 3, 2);
-        grid.add(worldSelector, 4, 2);
+        ScrollPane scrollPane = new ScrollPane(selectedScripts);
+        scrollPane.setMaxHeight(160);
+        grid.add(scrollPane, 1, 1);
+        grid.add(scriptSelector, 1, 2);
 
-        grid.add(new Label("Proxy:"), 0, 3);
-        grid.add(proxySelector, 1, 3);
+        Button addScriptButton = new Button("Add");
+        addScriptButton.setOnAction(e -> {
+            Script selectedScript = scriptSelector.getSelectionModel().getSelectedItem();
+            if (selectedScript != null) {
+                selectedScripts.getItems().add(selectedScript);
+            }
+        });
+        grid.add(addScriptButton, 2, 2);
 
-        grid.add(new Label("Memory:"), 0, 4);
-        grid.add(memoryAllocation, 1, 4);
+        selectedScripts.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.DELETE) {
+                selectedScripts.getItems().removeAll(selectedScripts.getSelectionModel().getSelectedItems());
+            }
+        });
 
-        grid.add(collectData, 1, 5);
-        grid.add(debugMode, 1, 6);
-        grid.add(debugPort, 2, 6);
-        grid.add(lowResourceMode, 1, 7);
-        grid.add(lowCpuMode, 1, 8);
-        grid.add(enableReflection, 1, 9);
-        grid.add(noRandoms, 1, 10);
-        grid.add(noInterface, 1, 11);
+        grid.add(new Label("World Type: "), 0, 3);
+        grid.add(worldTypeSelector, 1, 3);
+        grid.add(randomizeWorld, 2, 3);
+        grid.add(new Label("World: "), 3, 3);
+        grid.add(worldSelector, 4, 3);
+
+        grid.add(new Label("Proxy:"), 0, 4);
+        grid.add(proxySelector, 1, 4);
+
+        grid.add(new Label("Memory:"), 0, 5);
+        grid.add(memoryAllocation, 1, 5);
+
+        grid.add(collectData, 1, 6);
+        grid.add(debugMode, 1, 7);
+        grid.add(debugPort, 2, 7);
+        grid.add(lowResourceMode, 1, 8);
+        grid.add(lowCpuMode, 1, 9);
+        grid.add(enableReflection, 1, 10);
+        grid.add(noRandoms, 1, 11);
+        grid.add(noInterface, 1, 12);
 
         accountSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
             okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null ||
                                 scriptSelector.getSelectionModel().getSelectedItem() == null);
         });
 
-        scriptSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
-            okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null ||
-                                scriptSelector.getSelectionModel().getSelectedItem() == null);
+        selectedScripts.itemsProperty().addListener((observable, oldValue, newValue) -> {
+            okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null || selectedScripts.getItems().size() == 0);
         });
 
         Platform.runLater(accountSelector::requestFocus);
@@ -131,10 +157,11 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
             worldSelector.getSelectionModel().select(0);
             randomizeWorld.setSelected(false);
             noInterface.setSelected(false);
+            okButton.setDisable(true);
             return;
         }
         accountSelector.setValue(existingItem.getRunescapeAccount());
-        scriptSelector.setValue(existingItem.getScript());
+        selectedScripts.setItems(existingItem.getScripts());
         proxySelector.setValue(existingItem.getProxy());
         memoryAllocation.setText(String.valueOf(existingItem.getMemoryAllocation()));
         collectData.setSelected(existingItem.isCollectData());
@@ -148,11 +175,12 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         worldSelector.getSelectionModel().select(existingItem.getWorld());
         randomizeWorld.setSelected(existingItem.isRandomizeWorld());
         noInterface.setSelected(existingItem.isNoInterface());
+        okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null || selectedScripts.getItems().size() == 0);
     }
 
     @Override
     protected final Configuration onAdd() {
-        Configuration configuration = new Configuration(accountSelector.getSelectionModel().getSelectedItem(), scriptSelector.getSelectionModel().getSelectedItem());
+        Configuration configuration = new Configuration(accountSelector.getSelectionModel().getSelectedItem(), selectedScripts.getItems());
         if (proxySelector.getSelectionModel().getSelectedItem() != null) {
             configuration.setProxy(proxySelector.getSelectionModel().getSelectedItem());
         }
@@ -179,7 +207,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
     @Override
     protected Configuration onEdit(final Configuration existingItem) {
         existingItem.setRunescapeAccount(accountSelector.getSelectionModel().getSelectedItem());
-        existingItem.setScript(scriptSelector.getSelectionModel().getSelectedItem());
+        existingItem.setScripts(selectedScripts.getItems());
         existingItem.setProxy(proxySelector.getSelectionModel().getSelectedItem());
         if (!memoryAllocation.getText().trim().isEmpty()) {
             existingItem.setMemoryAllocation(Integer.parseInt(memoryAllocation.getText().trim()));

@@ -1,3 +1,5 @@
+package main;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -6,7 +8,7 @@ import java.net.URL;
 
 public class Version {
 
-    private final static float currentVersion = 6.8f;
+    private final static float currentVersion = 7.0f;
 
     public static boolean isLatestVersion() {
         try {

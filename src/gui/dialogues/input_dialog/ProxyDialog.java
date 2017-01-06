@@ -59,6 +59,7 @@ public final class ProxyDialog extends InputDialog<Proxy> {
             port.setText("");
             username.setText("");
             password.setText("");
+            okButton.setDisable(true);
             return;
         }
         ip.setText(existingItem.getIpAddress());
@@ -68,6 +69,8 @@ public final class ProxyDialog extends InputDialog<Proxy> {
             username.setText(securedProxy.getUsername());
             password.setText(securedProxy.getPassword());
         }
+        okButton.setDisable(ip.getText().trim().isEmpty() || port.getText().trim().isEmpty());
+
     }
 
     @Override
