@@ -96,6 +96,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
             Script selectedScript = scriptSelector.getSelectionModel().getSelectedItem();
             if (selectedScript != null) {
                 selectedScripts.getItems().add(selectedScript);
+                okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null);
             }
         });
         grid.add(addScriptButton, 2, 2);
@@ -103,6 +104,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         selectedScripts.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.DELETE) {
                 selectedScripts.getItems().removeAll(selectedScripts.getSelectionModel().getSelectedItems());
+                okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null || selectedScripts.getItems().size() == 0);
             }
         });
 
@@ -129,11 +131,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
 
         accountSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
             okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null ||
-                                scriptSelector.getSelectionModel().getSelectedItem() == null);
-        });
-
-        selectedScripts.itemsProperty().addListener((observable, oldValue, newValue) -> {
-            okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null || selectedScripts.getItems().size() == 0);
+                                selectedScripts.getItems().size() == 0);
         });
 
         Platform.runLater(accountSelector::requestFocus);
@@ -157,7 +155,6 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
             worldSelector.getSelectionModel().select(0);
             randomizeWorld.setSelected(false);
             noInterface.setSelected(false);
-            okButton.setDisable(true);
             return;
         }
         accountSelector.setValue(existingItem.getRunescapeAccount());
@@ -175,7 +172,6 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         worldSelector.getSelectionModel().select(existingItem.getWorld());
         randomizeWorld.setSelected(existingItem.isRandomizeWorld());
         noInterface.setSelected(existingItem.isNoInterface());
-        okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null || selectedScripts.getItems().size() == 0);
     }
 
     @Override

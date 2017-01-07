@@ -52,13 +52,11 @@ public final class RunescapeAccountDialog extends InputDialog<RunescapeAccount> 
             username.setText("");
             password.setText("");
             bankPin.setText("");
-            okButton.setDisable(true);
             return;
         }
         username.setText(existingItem.getUsername());
         password.setText(existingItem.getPassword());
         bankPin.setText(String.valueOf(existingItem.getPin()));
-        okButton.setDisable(username.getText().trim().isEmpty() || password.getText().trim().isEmpty());
     }
 
     @Override
