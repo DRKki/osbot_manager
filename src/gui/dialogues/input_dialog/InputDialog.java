@@ -4,21 +4,19 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
 public abstract class InputDialog<T> extends Dialog<T> {
 
-    final GridPane grid;
+    final VBox contentBox;
     final Node okButton;
     private T existingItem;
 
     InputDialog() {
         setTitle("Explv's OSBot Manager");
-        grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-        getDialogPane().setContent(grid);
+        contentBox = new VBox(10);
+        contentBox.setPadding(new Insets(20, 150, 10, 10));
+        getDialogPane().setContent(contentBox);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         okButton = getDialogPane().lookupButton(ButtonType.OK);
         okButton.setDisable(true);

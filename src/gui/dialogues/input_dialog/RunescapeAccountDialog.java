@@ -7,6 +7,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.FlowPane;
 
 public final class RunescapeAccountDialog extends InputDialog<RunescapeAccount> {
 
@@ -27,14 +28,11 @@ public final class RunescapeAccountDialog extends InputDialog<RunescapeAccount> 
         bankPin.setPromptText("(Optional) Bank Pin");
         bankPin.setTextFormatter(new TextFormatter<>(change -> change.getText().matches("\\d*") ? change : null));
 
-        grid.add(new Label("Username:"), 0, 0);
-        grid.add(username, 1, 0);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Username:"), username));
 
-        grid.add(new Label("Password:"), 0, 1);
-        grid.add(password, 1, 1);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Password:"), password));
 
-        grid.add(new Label("Bank Pin:"), 0, 2);
-        grid.add(bankPin, 1, 2);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Bank Pin:"), bankPin));
 
         ChangeListener<String> changeListener = (observable, oldValue, newValue) -> {
             okButton.setDisable(username.getText().trim().isEmpty() || password.getText().trim().isEmpty());
@@ -57,6 +55,7 @@ public final class RunescapeAccountDialog extends InputDialog<RunescapeAccount> 
         username.setText(existingItem.getUsername());
         password.setText(existingItem.getPassword());
         bankPin.setText(String.valueOf(existingItem.getPin()));
+        okButton.setDisable(username.getText().trim().isEmpty() || password.getText().trim().isEmpty());
     }
 
     @Override

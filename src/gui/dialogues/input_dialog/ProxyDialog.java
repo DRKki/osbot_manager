@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.FlowPane;
 
 public final class ProxyDialog extends InputDialog<Proxy> {
 
@@ -31,17 +32,13 @@ public final class ProxyDialog extends InputDialog<Proxy> {
         password = new PasswordField();
         password.setPromptText("(Optional) Password");
 
-        grid.add(new Label("IP:"), 0, 0);
-        grid.add(ip, 1, 0);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("IP:"), ip));
 
-        grid.add(new Label("Port:"), 0, 1);
-        grid.add(port, 1, 1);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Port:"), port));
 
-        grid.add(new Label("Username:"), 0, 2);
-        grid.add(username, 1, 2);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Username:"), username));
 
-        grid.add(new Label("Password:"), 0, 3);
-        grid.add(password, 1, 3);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Password:"), password));
 
         ChangeListener<String> listener = (observable, oldValue, newValue) -> {
             okButton.setDisable(ip.getText().trim().isEmpty() || port.getText().trim().isEmpty());
@@ -68,6 +65,7 @@ public final class ProxyDialog extends InputDialog<Proxy> {
             username.setText(securedProxy.getUsername());
             password.setText(securedProxy.getPassword());
         }
+        okButton.setDisable(ip.getText().trim().isEmpty() || port.getText().trim().isEmpty());
     }
 
     @Override

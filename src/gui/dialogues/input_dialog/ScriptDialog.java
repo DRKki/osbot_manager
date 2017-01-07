@@ -8,6 +8,8 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -18,6 +20,7 @@ public final class ScriptDialog extends InputDialog<Script> {
     private final ChoiceBox<ScriptType> scriptTypeSelector;
     private final ChoiceBox<Script> localScripts;
     private final Text invalidScriptIDMessage;
+    private final Pane scriptIdentifierPane;
 
     public ScriptDialog() {
 
@@ -27,7 +30,10 @@ public final class ScriptDialog extends InputDialog<Script> {
         scriptTypeSelector.getSelectionModel().select(ScriptType.LOCAL);
 
         localScripts = new ChoiceBox<>(FXCollections.observableArrayList(new LocalScriptLoader().getLocalScripts()));
-        localScripts.getSelectionModel().select(0);
+
+        if (!localScripts.getItems().isEmpty()) {
+            localScripts.getSelectionModel().select(0);
+        }
 
         scriptIdentifierField = new TextField();
         scriptIdentifierField.setPromptText("Script ID");
@@ -37,8 +43,10 @@ public final class ScriptDialog extends InputDialog<Script> {
         scriptParameters = new TextField();
         scriptParameters.setPromptText("Parameters:");
 
-        grid.add(scriptTypeSelector, 0, 0);
-        grid.add(localScripts, 1, 0);
+        scriptIdentifierPane = new FlowPane(10, 10);
+        contentBox.getChildren().add(scriptIdentifierPane);
+        scriptIdentifierPane.getChildren().add(scriptTypeSelector);
+        scriptIdentifierPane.getChildren().add(localScripts);
 
         if(!localScripts.getItems().isEmpty()) {
             okButton.setDisable(false);
@@ -55,8 +63,7 @@ public final class ScriptDialog extends InputDialog<Script> {
             }
         });
 
-        grid.add(new Label("Script parameters:"), 0, 1);
-        grid.add(scriptParameters, 1, 1);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Script parameters:"), scriptParameters));
 
         scriptIdentifierField.textProperty().addListener((observable, oldValue, newValue) -> {
             if(!validateSDNScriptID()) {
@@ -72,14 +79,14 @@ public final class ScriptDialog extends InputDialog<Script> {
     }
 
     private void showSDNScriptField() {
-        grid.getChildren().remove(localScripts);
-        grid.add(scriptIdentifierField, 1, 0);
+        scriptIdentifierPane.getChildren().remove(localScripts);
+        scriptIdentifierPane.getChildren().add(scriptIdentifierField);
         okButton.setDisable(scriptIdentifierField.getText().trim().isEmpty());
     }
 
     private void showLocalScriptSelector() {
-        grid.getChildren().remove(scriptIdentifierField);
-        grid.add(localScripts, 1, 0);
+        scriptIdentifierPane.getChildren().remove(scriptIdentifierField);
+        scriptIdentifierPane.getChildren().add(localScripts);
         okButton.setDisable(false);
     }
 
@@ -104,11 +111,13 @@ public final class ScriptDialog extends InputDialog<Script> {
                     break;
                 }
             }
+            okButton.setDisable(localScripts.getSelectionModel().getSelectedItem() == null);
         } else {
             if(scriptTypeSelector.getValue() != ScriptType.SDN) {
                 scriptTypeSelector.setValue(ScriptType.SDN);
             }
             scriptIdentifierField.setText(existingItem.getScriptIdentifier().trim());
+            okButton.setDisable(!validateSDNScriptID());
         }
         scriptParameters.setText(existingItem.getParameters().trim());
     }

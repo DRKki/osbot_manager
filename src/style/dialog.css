@@ -33,4 +33,11 @@
     -fx-text-fill: #000000;
 }
 
+.text-field {
+    -fx-background-color:transparent;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #FFFFFF;
+}
+
 

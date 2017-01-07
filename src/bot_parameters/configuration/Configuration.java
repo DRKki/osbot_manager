@@ -39,10 +39,13 @@ public final class Configuration implements BotParameter, Copyable<Configuration
     private SimpleBooleanProperty reflection = new SimpleBooleanProperty();
     private SimpleBooleanProperty noRandoms = new SimpleBooleanProperty();
     private SimpleBooleanProperty noInterface = new SimpleBooleanProperty();
+    private SimpleBooleanProperty noRender = new SimpleBooleanProperty();
     private SimpleObjectProperty<WorldType> worldType = new SimpleObjectProperty<>();
     private SimpleIntegerProperty world = new SimpleIntegerProperty(-1);
     private SimpleBooleanProperty randomizeWorld = new SimpleBooleanProperty();
     private SimpleBooleanProperty isRunning = new SimpleBooleanProperty();
+
+    private int processID;
 
     public Configuration(final RunescapeAccount runescapeAccount, final ObservableList<Script> scripts) {
         this.runescapeAccount = new SimpleObjectProperty<>(runescapeAccount);
@@ -86,6 +89,8 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
     public final boolean isNoInterface() { return noInterface.get(); }
 
+    public final boolean isNoRender() { return noRender.get(); }
+
     public final WorldType getWorldType() { return worldType.get(); }
 
     public final Integer getWorld() { return world.get(); }
@@ -126,6 +131,8 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
     public final void setNoInterface(final boolean noInterface) { this.noInterface.set(noInterface); }
 
+    public final void setNoRender(final boolean noRender) { this.noRender.set(noRender); }
+
     public final void setWorldType(final WorldType worldType) { this.worldType.set(worldType); }
 
     public final void setWorld(final Integer world) { this.world.set(world); }
@@ -154,6 +161,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         stream.writeBoolean(isReflection());
         stream.writeBoolean(isNoRandoms());
         stream.writeBoolean(isNoInterface());
+        stream.writeBoolean(isNoRender());
     }
 
     private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {
@@ -190,6 +198,12 @@ public final class Configuration implements BotParameter, Copyable<Configuration
             System.out.println("Config does not contain new nointerface option, skipping");
             noInterface = new SimpleBooleanProperty();
         }
+        try {
+            noRender = new SimpleBooleanProperty(stream.readBoolean());
+        } catch (Exception e) {
+            System.out.println("Config does not contain new norender option, skipping");
+            noRender = new SimpleBooleanProperty();
+        }
         isRunning = new SimpleBooleanProperty();
     }
 
@@ -210,11 +224,24 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         }
 
         List<String> allowParams = new ArrayList<>();
-        if (lowResourceMode.get()) allowParams.add("lowresource");
-        if (lowCpuMode.get()) allowParams.add("lowcpu");
-        if (reflection.get()) allowParams.add("reflection");
-        if (noRandoms.get()) allowParams.add("norandoms");
-        if (noInterface.get()) allowParams.add("nointerface");
+        if (lowResourceMode.get()) {
+            allowParams.add("lowresource");
+        }
+        if (lowCpuMode.get()) {
+            allowParams.add("lowcpu");
+        }
+        if (reflection.get()) {
+            allowParams.add("reflection");
+        }
+        if (noRandoms.get()) {
+            allowParams.add("norandoms");
+        }
+        if (noInterface.get()) {
+            allowParams.add("nointerface");
+        }
+        if (noRender.get()) {
+            allowParams.add("norender");
+        }
 
         if (!allowParams.isEmpty()) {
             parameterString += " -allow " + String.join(",", allowParams);
@@ -256,6 +283,8 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         configurationCopy.setRandomizeWorld(isRandomizeWorld());
         configurationCopy.setReflection(isReflection());
         configurationCopy.setNoRandoms(isNoRandoms());
+        configurationCopy.setNoRender(isNoRender());
+        configurationCopy.setNoInterface(isNoInterface());
         return configurationCopy;
     }
 
@@ -281,7 +310,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
                     List<Integer> javaPIDs = getJavaPIDs();
 
-                    int processID = -1;
+                    processID = -1;
 
                     try (final InputStream stdout = process.getInputStream();
                          final InputStreamReader inputStreamReader = new InputStreamReader(stdout);
@@ -323,6 +352,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
                     if (processID != -1) {
                         System.out.println("Killing");
                         killProcess(processID);
+                        processID = -1;
                     }
 
                 } catch (IOException e) {
@@ -333,6 +363,16 @@ public final class Configuration implements BotParameter, Copyable<Configuration
             }
         });
         runThread.start();
+    }
+
+    public void stop() {
+        if (!isRunning()) {
+            return;
+        }
+        if (processID == -1) {
+            return;
+        }
+        killProcess(processID);
     }
 
     private List<Integer> getJavaPIDs() {

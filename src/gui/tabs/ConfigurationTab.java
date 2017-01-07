@@ -19,7 +19,7 @@ import java.util.Optional;
 public class ConfigurationTab extends TableTab<Configuration> {
 
     private final BotSettingsTab botSettingsTab;
-    private final Button startButton, startAllButton;
+    private final Button startButton, stopButton;
 
     public ConfigurationTab(final ObservableList<RunescapeAccount> runescapeAccounts, final ObservableList<Script> scripts, final ObservableList<Proxy> proxies,  final BotSettingsTab botSettingsTab) {
         super("Configurations", "No configurations found.", new ConfigurationDialog(runescapeAccounts, scripts, proxies));
@@ -31,20 +31,15 @@ public class ConfigurationTab extends TableTab<Configuration> {
         startButton = new ToolbarButton("Start", "start_icon.png", "start_icon_blue.png");
         toolBar.getChildren().add(startButton);
 
-        startAllButton = new ToolbarButton("Start All", "start_all_icon.png", "start_all_icon_blue.png");
-        toolBar.getChildren().add(startAllButton);
+        stopButton = new ToolbarButton("Stop", "stop_icon.png", "stop_icon_blue.png");
+        toolBar.getChildren().add(stopButton);
 
         startButton.setOnAction(e -> {
             startButton.setDisable(true);
-            startAllButton.setDisable(true);
             start();
         });
 
-        startAllButton.setOnAction(e -> {
-            startAllButton.setDisable(true);
-            startButton.setDisable(true);
-            startAll();
-        });
+        stopButton.setOnAction(e -> stop());
 
         TableColumn<Configuration, ObservableList<Script>> scriptCol = new TableColumn<>("Scripts");
         scriptCol.setCellValueFactory(new PropertyValueFactory<>("scripts"));
@@ -91,7 +86,10 @@ public class ConfigurationTab extends TableTab<Configuration> {
         TableColumn<Configuration, Boolean> noInterfaceCol = new TableColumn<>("No Interface");
         noInterfaceCol.setCellValueFactory(new PropertyValueFactory<>("noInterface"));
 
-        getTableView().getColumns().addAll(scriptCol, accountCol, worldTypeCol, randomWorldCol, worldCol, proxyCol, memoryCol, collectDataCol, debugModeCol, debugPortCol, lowCpuCol, lowResCol, reflectionCol, noRandomsCol, noInterfaceCol);
+        TableColumn<Configuration, Boolean> noRenderCol = new TableColumn<>("No Render");
+        noRenderCol.setCellValueFactory(new PropertyValueFactory<>("noRender"));
+
+        getTableView().getColumns().addAll(scriptCol, accountCol, worldTypeCol, randomWorldCol, worldCol, proxyCol, memoryCol, collectDataCol, debugModeCol, debugPortCol, lowCpuCol, lowResCol, reflectionCol, noRandomsCol, noInterfaceCol, noRenderCol);
 
         getTableView().setRowFactory(param -> {
 
@@ -115,15 +113,17 @@ public class ConfigurationTab extends TableTab<Configuration> {
         MenuItem startOption = new MenuItem("Start");
         startOption.setOnAction(e -> start());
         contextMenu.getItems().add(startOption);
+
+        MenuItem stopOption = new MenuItem("Stop");
+        stopOption.setOnAction(e -> stop());
+        contextMenu.getItems().add(stopOption);
     }
 
     private void start() {
         runConfigurations(getTableView().getSelectionModel().getSelectedItems());
     }
 
-    private void startAll() {
-        runConfigurations(getTableView().getItems());
-    }
+    private void stop() { getTableView().getSelectionModel().getSelectedItems().forEach(Configuration::stop); }
 
     private void runConfigurations(final List<Configuration> configurations) {
         final int delay = configurations.size() > 1 ? getDelayFromUser() : 0;
@@ -138,7 +138,6 @@ public class ConfigurationTab extends TableTab<Configuration> {
                 }
             }
             Platform.runLater(() -> {
-                startAllButton.setDisable(false);
                 startButton.setDisable(false);
             });
         }).start();

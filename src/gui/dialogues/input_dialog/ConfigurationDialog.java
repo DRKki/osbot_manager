@@ -6,12 +6,11 @@ import bot_parameters.configuration.WorldType;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.FlowPane;
 
 import java.util.List;
 
@@ -30,67 +29,35 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
     private final CheckBox enableReflection;
     private final CheckBox noRandoms;
     private final CheckBox noInterface;
+    private final CheckBox noRender;
     private final ChoiceBox<WorldType> worldTypeSelector;
     private final CheckBox randomizeWorld;
     private final ChoiceBox<Integer> worldSelector;
-
 
     public ConfigurationDialog(ObservableList<RunescapeAccount> accountList, ObservableList<Script> scriptList, ObservableList<Proxy> proxyList) {
 
         setHeaderText("Add A Run Configuration");
 
         accountSelector = new ChoiceBox<>(accountList);
+        if (!accountList.isEmpty()) {
+            accountSelector.getSelectionModel().select(0);
+        }
 
-        scriptSelector = new ChoiceBox<>(scriptList);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Account:"), accountSelector));
+
+        contentBox.getChildren().add(new Label("Scripts"));
 
         selectedScripts = new ListView<>();
+        selectedScripts.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        ScrollPane selectScriptScrollPane = new ScrollPane(selectedScripts);
+        selectScriptScrollPane.setMaxHeight(160);
+        selectScriptScrollPane.setMaxWidth(200);
+        contentBox.getChildren().add(selectScriptScrollPane);
 
-        proxySelector = new ChoiceBox<>(proxyList);
-
-        memoryAllocation = new TextField();
-        memoryAllocation.setPromptText("(Optional) Memory Allocation");
-        memoryAllocation.setTextFormatter(new TextFormatter<>(change -> change.getText().matches("\\d*") ? change : null));
-
-        collectData = new CheckBox("Allow data collection");
-
-        debugMode = new CheckBox("Debug mode");
-
-        debugPort = new TextField();
-        debugPort.setPromptText("Debug port");
-        debugPort.setTextFormatter(new TextFormatter<>(change -> change.getText().matches("\\d*") ? change : null));
-
-        lowResourceMode = new CheckBox("Low resource mode");
-
-        lowCpuMode = new CheckBox("Low cpu mode");
-
-        enableReflection = new CheckBox("Reflection");
-
-        noRandoms = new CheckBox("No randoms");
-
-        noInterface = new CheckBox("No interface");
-
-        worldTypeSelector = new ChoiceBox<>(FXCollections.observableArrayList(WorldType.values()));
-
-        worldSelector = new ChoiceBox<>(FXCollections.observableArrayList(WorldType.F2P.worlds));
-        worldSelector.getSelectionModel().select(0);
-
-        worldTypeSelector.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
-            worldSelector.getItems().setAll(worldTypeSelector.getItems().get((Integer) newValue).worlds);
-            worldSelector.getSelectionModel().select(0);
-        });
-
-        randomizeWorld = new CheckBox("Randomize");
-
-        grid.add(new Label("Account:"), 0, 0);
-        grid.add(accountSelector, 1, 0);
-
-        grid.add(new Label("Scripts"), 0, 1);
-
-        ScrollPane scrollPane = new ScrollPane(selectedScripts);
-        scrollPane.setMaxHeight(160);
-        grid.add(scrollPane, 1, 1);
-        grid.add(scriptSelector, 1, 2);
-
+        scriptSelector = new ChoiceBox<>(scriptList);
+        if (!scriptList.isEmpty()) {
+            scriptSelector.getSelectionModel().select(0);
+        }
         Button addScriptButton = new Button("Add");
         addScriptButton.setOnAction(e -> {
             Script selectedScript = scriptSelector.getSelectionModel().getSelectedItem();
@@ -99,39 +66,69 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
                 okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null);
             }
         });
-        grid.add(addScriptButton, 2, 2);
+        contentBox.getChildren().add(new FlowPane(10, 10, scriptSelector, addScriptButton));
+
+        proxySelector = new ChoiceBox<>(proxyList);
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Proxy:"), proxySelector));
+
+        worldTypeSelector = new ChoiceBox<>(FXCollections.observableArrayList(WorldType.values()));
+        worldSelector = new ChoiceBox<>(FXCollections.observableArrayList(WorldType.F2P.worlds));
+        worldSelector.getSelectionModel().select(0);
+        worldTypeSelector.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            worldSelector.getItems().setAll(worldTypeSelector.getItems().get((Integer) newValue).worlds);
+            worldSelector.getSelectionModel().select(0);
+        });
+        randomizeWorld = new CheckBox("Randomize");
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("World Type: "), worldTypeSelector, randomizeWorld, new Label("World: "), worldSelector));
+
+
+        memoryAllocation = new TextField();
+        memoryAllocation.setPromptText("(Optional) Memory Allocation");
+        memoryAllocation.setTextFormatter(new TextFormatter<>(change -> change.getText().matches("\\d*") ? change : null));
+        contentBox.getChildren().add(new FlowPane(10, 10, new Label("Memory:"), memoryAllocation));
+
+        collectData = new CheckBox("Allow data collection");
+        contentBox.getChildren().add(collectData);
+
+        debugMode = new CheckBox("Debug mode");
+
+        debugPort = new TextField();
+        debugPort.setPromptText("Debug port");
+        debugPort.setTextFormatter(new TextFormatter<>(change -> change.getText().matches("\\d*") ? change : null));
+
+        contentBox.getChildren().add(new FlowPane(10, 10, debugMode, debugPort));
+
+        lowResourceMode = new CheckBox("Low resource mode");
+        contentBox.getChildren().add(lowResourceMode);
+
+        lowCpuMode = new CheckBox("Low cpu mode");
+        contentBox.getChildren().add(lowCpuMode);
+
+        enableReflection = new CheckBox("Reflection");
+        contentBox.getChildren().add(enableReflection);
+
+        noRandoms = new CheckBox("No randoms");
+        contentBox.getChildren().add(noRandoms);
+
+        noInterface = new CheckBox("No interface");
+        contentBox.getChildren().add(noInterface);
+
+        noRender = new CheckBox("No render");
+        contentBox.getChildren().add(noRender);
 
         selectedScripts.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.DELETE) {
-                selectedScripts.getItems().removeAll(selectedScripts.getSelectionModel().getSelectedItems());
+                List<Integer> selectedIndices = selectedScripts.getSelectionModel().getSelectedIndices();
+                for (int i = selectedIndices.size() - 1; i >= 0; i --) {
+                    selectedScripts.getItems().remove((int) selectedIndices.get(i));
+                }
                 okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null || selectedScripts.getItems().size() == 0);
             }
         });
 
-        grid.add(new Label("World Type: "), 0, 3);
-        grid.add(worldTypeSelector, 1, 3);
-        grid.add(randomizeWorld, 2, 3);
-        grid.add(new Label("World: "), 3, 3);
-        grid.add(worldSelector, 4, 3);
-
-        grid.add(new Label("Proxy:"), 0, 4);
-        grid.add(proxySelector, 1, 4);
-
-        grid.add(new Label("Memory:"), 0, 5);
-        grid.add(memoryAllocation, 1, 5);
-
-        grid.add(collectData, 1, 6);
-        grid.add(debugMode, 1, 7);
-        grid.add(debugPort, 2, 7);
-        grid.add(lowResourceMode, 1, 8);
-        grid.add(lowCpuMode, 1, 9);
-        grid.add(enableReflection, 1, 10);
-        grid.add(noRandoms, 1, 11);
-        grid.add(noInterface, 1, 12);
-
         accountSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
             okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null ||
-                                selectedScripts.getItems().size() == 0);
+                    selectedScripts.getItems().size() == 0);
         });
 
         Platform.runLater(accountSelector::requestFocus);
@@ -155,6 +152,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
             worldSelector.getSelectionModel().select(0);
             randomizeWorld.setSelected(false);
             noInterface.setSelected(false);
+            noRender.setSelected(false);
             return;
         }
         accountSelector.setValue(existingItem.getRunescapeAccount());
@@ -172,6 +170,8 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         worldSelector.getSelectionModel().select(existingItem.getWorld());
         randomizeWorld.setSelected(existingItem.isRandomizeWorld());
         noInterface.setSelected(existingItem.isNoInterface());
+        noRender.setSelected(existingItem.isNoRender());
+        okButton.setDisable(accountSelector.getSelectionModel().getSelectedItem() == null || selectedScripts.getItems().size() == 0);
     }
 
     @Override
@@ -196,6 +196,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         configuration.setWorld(worldSelector.getValue());
         configuration.setRandomizeWorld(randomizeWorld.isSelected());
         configuration.setNoInterface(noInterface.isSelected());
+        configuration.setNoRender(noRender.isSelected());
 
         return configuration;
     }
@@ -226,6 +227,7 @@ public final class ConfigurationDialog extends InputDialog<Configuration> {
         existingItem.setWorld(worldSelector.getValue());
         existingItem.setRandomizeWorld(randomizeWorld.isSelected());
         existingItem.setNoInterface(noInterface.isSelected());
+        existingItem.setNoRender(noRender.isSelected());
         return existingItem;
     }
 }
