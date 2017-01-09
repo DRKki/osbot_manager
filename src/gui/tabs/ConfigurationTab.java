@@ -6,13 +6,23 @@ import bot_parameters.configuration.WorldType;
 import bot_parameters.proxy.Proxy;
 import bot_parameters.script.Script;
 import gui.ToolbarButton;
+import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ConfigurationDialog;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Modality;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -117,6 +127,10 @@ public class ConfigurationTab extends TableTab<Configuration> {
         MenuItem stopOption = new MenuItem("Stop");
         stopOption.setOnAction(e -> stop());
         contextMenu.getItems().add(stopOption);
+
+        MenuItem viewLogOption = new MenuItem("Show log");
+        viewLogOption.setOnAction(e -> showLog());
+        contextMenu.getItems().add(viewLogOption);
     }
 
     private void start() {
@@ -125,16 +139,57 @@ public class ConfigurationTab extends TableTab<Configuration> {
 
     private void stop() { getTableView().getSelectionModel().getSelectedItems().forEach(Configuration::stop); }
 
+    private void showLog() {
+        Configuration configuration = getTableView().getSelectionModel().getSelectedItem();
+        Dialog dialog = new Dialog();
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.setResizable(true);
+        dialog.initModality(Modality.NONE);
+
+        TextArea textArea = new TextArea();
+        ScrollPane scrollPane = new ScrollPane(textArea);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setFitToWidth(true);
+        AnchorPane.setBottomAnchor(scrollPane, 0.0);
+        AnchorPane.setRightAnchor(scrollPane, 0.0);
+        AnchorPane.setLeftAnchor(scrollPane, 0.0);
+        AnchorPane.setTopAnchor(scrollPane, 0.0);
+        AnchorPane anchorPane = new AnchorPane(scrollPane);
+
+        dialog.getDialogPane().setContent(anchorPane);
+
+        dialog.show();
+
+        Thread readFileThread = new Thread(() -> {
+            try (BufferedReader br = new BufferedReader(new FileReader(new File(configuration.getLogFileName()).toString()))) {
+                String line = null;
+                while (dialog.isShowing() && (((line = br.readLine()) != null) || configuration.isRunning())) {
+                    if (line != null) {
+                        final String updateLine = line;
+                        Platform.runLater(() -> textArea.appendText(updateLine + System.lineSeparator()));
+                    } else {
+                        Thread.sleep(500);
+                    }
+                }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        readFileThread.start();
+    }
+
     private void runConfigurations(final List<Configuration> configurations) {
         final int delay = configurations.size() > 1 ? getDelayFromUser() : 0;
 
         new Thread(() -> {
             for (final Configuration configuration : configurations) {
-                configuration.run(botSettingsTab.getBot().getOsbotPath(), botSettingsTab.getOsBotAccount());
                 try {
+                    configuration.run(botSettingsTab.getBot().getOsbotPath(), botSettingsTab.getOsBotAccount());
                     Thread.sleep(delay * 1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                } catch (IOException e) {
+                    Platform.runLater(() -> new ExceptionDialog(e).show());
                 }
             }
             Platform.runLater(() -> {

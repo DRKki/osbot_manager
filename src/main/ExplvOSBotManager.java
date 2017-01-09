@@ -12,6 +12,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public final class ExplvOSBotManager extends Application {
 
     public static void main(final String[] args) {
@@ -22,6 +26,8 @@ public final class ExplvOSBotManager extends Application {
     public final void start(final Stage primaryStage) {
 
         if (!Version.isLatestVersion()) showUpdateDialog();
+
+        createDirectories();
 
         primaryStage.setTitle("Explv's OSBot Manager");
         Scene scene = new Scene(new ManagerPane(), 600, 400);
@@ -52,5 +58,15 @@ public final class ExplvOSBotManager extends Application {
         grid.add(threadLink, 0, 1);
 
         dialog.showAndWait();
+    }
+
+    private void createDirectories() {
+        String rootDirPath = Paths.get(System.getProperty("user.home"), "ExplvOSBotManager").toString();
+        File configDir = Paths.get(rootDirPath, "Configurations").toFile();
+        File logsDir = Paths.get(rootDirPath, "Logs").toFile();
+
+        if ((!configDir.exists() && !configDir.mkdirs()) || (!logsDir.exists() && !logsDir.mkdirs())) {
+            throw new IllegalStateException("Failed to create required directories");
+        }
     }
 }

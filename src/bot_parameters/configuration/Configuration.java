@@ -21,6 +21,7 @@ import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.net.ServerSocket;
+import java.nio.file.Paths;
 import java.util.*;
 
 public final class Configuration implements BotParameter, Copyable<Configuration>, Serializable {
@@ -44,6 +45,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
     private SimpleIntegerProperty world = new SimpleIntegerProperty(-1);
     private SimpleBooleanProperty randomizeWorld = new SimpleBooleanProperty();
     private SimpleBooleanProperty isRunning = new SimpleBooleanProperty();
+    private String logFileName;
 
     private int processID;
 
@@ -51,6 +53,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         this.runescapeAccount = new SimpleObjectProperty<>(runescapeAccount);
         this.scripts = new SimpleListProperty<>(scripts);
         this.proxy = new SimpleObjectProperty<>(new Proxy("No Proxy", -1));
+        logFileName = Paths.get(System.getProperty("user.home"), "ExplvOSBotManager", "Logs", UUID.randomUUID().toString()).toString();
     }
 
     public RunescapeAccount getRunescapeAccount() {
@@ -77,29 +80,53 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         return debugMode.get();
     }
 
-    public final Integer getDebugPort() { return debugPort.get(); }
+    public final Integer getDebugPort() {
+        return debugPort.get();
+    }
 
-    public final boolean isLowResourceMode() { return lowResourceMode.get(); }
+    public final boolean isLowResourceMode() {
+        return lowResourceMode.get();
+    }
 
-    public final boolean isLowCpuMode() { return lowCpuMode.get(); }
+    public final boolean isLowCpuMode() {
+        return lowCpuMode.get();
+    }
 
-    public final boolean isReflection() { return reflection.get(); }
+    public final boolean isReflection() {
+        return reflection.get();
+    }
 
-    public final boolean isNoRandoms() { return noRandoms.get(); }
+    public final boolean isNoRandoms() {
+        return noRandoms.get();
+    }
 
-    public final boolean isNoInterface() { return noInterface.get(); }
+    public final boolean isNoInterface() {
+        return noInterface.get();
+    }
 
-    public final boolean isNoRender() { return noRender.get(); }
+    public final boolean isNoRender() {
+        return noRender.get();
+    }
 
-    public final WorldType getWorldType() { return worldType.get(); }
+    public final WorldType getWorldType() {
+        return worldType.get();
+    }
 
-    public final Integer getWorld() { return world.get(); }
+    public final Integer getWorld() {
+        return world.get();
+    }
 
-    public boolean isRandomizeWorld() { return randomizeWorld.get(); }
+    public boolean isRandomizeWorld() {
+        return randomizeWorld.get();
+    }
 
-    public final void setRunescapeAccount(final RunescapeAccount runescapeAccount) { this.runescapeAccount.set(runescapeAccount); }
+    public final void setRunescapeAccount(final RunescapeAccount runescapeAccount) {
+        this.runescapeAccount.set(runescapeAccount);
+    }
 
-    public final void setScripts(final ObservableList<Script> scripts) { this.scripts.set(scripts); }
+    public final void setScripts(final ObservableList<Script> scripts) {
+        this.scripts.set(scripts);
+    }
 
     public final void setProxy(final Proxy proxy) {
         this.proxy.set(proxy);
@@ -121,29 +148,57 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         this.debugPort.set(debugPort);
     }
 
-    public final void setLowCpuMode(final boolean lowCpuMode) { this.lowCpuMode.set(lowCpuMode); }
+    public final void setLowCpuMode(final boolean lowCpuMode) {
+        this.lowCpuMode.set(lowCpuMode);
+    }
 
-    public final void setLowResourceMode(final boolean lowResourceMode) { this.lowResourceMode.set(lowResourceMode); }
+    public final void setLowResourceMode(final boolean lowResourceMode) {
+        this.lowResourceMode.set(lowResourceMode);
+    }
 
-    public final void setReflection(final boolean reflection) { this.reflection.set(reflection); }
+    public final void setReflection(final boolean reflection) {
+        this.reflection.set(reflection);
+    }
 
-    public final void setNoRandoms(final boolean noRandoms) { this.noRandoms.set(noRandoms); }
+    public final void setNoRandoms(final boolean noRandoms) {
+        this.noRandoms.set(noRandoms);
+    }
 
-    public final void setNoInterface(final boolean noInterface) { this.noInterface.set(noInterface); }
+    public final void setNoInterface(final boolean noInterface) {
+        this.noInterface.set(noInterface);
+    }
 
-    public final void setNoRender(final boolean noRender) { this.noRender.set(noRender); }
+    public final void setNoRender(final boolean noRender) {
+        this.noRender.set(noRender);
+    }
 
-    public final void setWorldType(final WorldType worldType) { this.worldType.set(worldType); }
+    public final void setWorldType(final WorldType worldType) {
+        this.worldType.set(worldType);
+    }
 
-    public final void setWorld(final Integer world) { this.world.set(world); }
+    public final void setWorld(final Integer world) {
+        this.world.set(world);
+    }
 
-    public final void setRandomizeWorld(final boolean randomizeWorld) { this.randomizeWorld.set(randomizeWorld); }
+    public final void setRandomizeWorld(final boolean randomizeWorld) {
+        this.randomizeWorld.set(randomizeWorld);
+    }
 
-    public final boolean isRunning() { return isRunning.get(); }
+    public final boolean isRunning() {
+        return isRunning.get();
+    }
 
-    public void setRunning(final boolean isRunning) { this.isRunning.set(isRunning); }
+    public void setRunning(final boolean isRunning) {
+        this.isRunning.set(isRunning);
+    }
 
-    public final void addRunListener(final ChangeListener<Boolean> listener) { isRunning.addListener(listener); }
+    public final void addRunListener(final ChangeListener<Boolean> listener) {
+        isRunning.addListener(listener);
+    }
+
+    public String getLogFileName() {
+        return logFileName;
+    }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeObject(getRunescapeAccount());
@@ -162,6 +217,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         stream.writeBoolean(isNoRandoms());
         stream.writeBoolean(isNoInterface());
         stream.writeBoolean(isNoRender());
+        stream.writeObject(logFileName);
     }
 
     private void readObject(ObjectInputStream stream) throws ClassNotFoundException, IOException {
@@ -203,6 +259,11 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         } catch (Exception e) {
             System.out.println("Config does not contain new norender option, skipping");
             noRender = new SimpleBooleanProperty();
+        }
+        try {
+            logFileName = (String) stream.readObject();
+        } catch (Exception e) {
+            logFileName = Paths.get(System.getProperty("user.home"), "ExplvOSBotManager", "Logs", UUID.randomUUID().toString()).toString();
         }
         isRunning = new SimpleBooleanProperty();
     }
@@ -248,7 +309,8 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         }
 
         int worldVal;
-        if (randomizeWorld.get()) worldVal = worldType.get().worlds[new Random().nextInt(worldType.get().worlds.length)];
+        if (randomizeWorld.get())
+            worldVal = worldType.get().worlds[new Random().nextInt(worldType.get().worlds.length)];
         else worldVal = world.get();
 
         if (worldVal != -1) parameterString += " -world " + worldVal;
@@ -288,19 +350,31 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         return configurationCopy;
     }
 
-    public void run(final String osbotPath, final OSBotAccount osBotAccount) {
+    public void run(final String osbotPath, final OSBotAccount osBotAccount) throws IOException {
+
+        File logFile = new File(logFileName);
+
+        if (logFile.exists()) {
+            logFile.delete();
+        }
+
+        if (!logFile.exists() && !logFile.createNewFile()) {
+            throw new IllegalStateException("Could not create log file");
+        }
+
         Thread runThread = new Thread(() -> {
 
-            for (final Script script : scripts.get()) {
+            try (BufferedWriter br = new BufferedWriter(new FileWriter(logFile))) {
 
-                List<String> command = new ArrayList<>();
+                for (final Script script : scripts.get()) {
 
-                Collections.addAll(command, "java", "-jar", osbotPath);
-                Collections.addAll(command, osBotAccount.toParameterString().split(" "));
-                Collections.addAll(command, this.toParameterString().split(" "));
-                Collections.addAll(command, script.toParameterString().split(" "));
+                    List<String> command = new ArrayList<>();
 
-                try {
+                    Collections.addAll(command, "java", "-jar", osbotPath);
+                    Collections.addAll(command, osBotAccount.toParameterString().split(" "));
+                    Collections.addAll(command, this.toParameterString().split(" "));
+                    Collections.addAll(command, script.toParameterString().split(" "));
+
 
                     final ProcessBuilder processBuilder = new ProcessBuilder(command);
                     processBuilder.redirectErrorStream(true);
@@ -318,6 +392,9 @@ public final class Configuration implements BotParameter, Copyable<Configuration
 
                         String outputLine;
                         while ((outputLine = bufferedReader.readLine()) != null) {
+
+                            br.write(outputLine + System.lineSeparator());
+                            br.flush();
 
                             outputLine = outputLine.trim();
 
@@ -348,18 +425,15 @@ public final class Configuration implements BotParameter, Copyable<Configuration
                         }
                     }
 
-                    System.out.println("Reached");
                     if (processID != -1) {
-                        System.out.println("Killing");
                         killProcess(processID);
                         processID = -1;
                     }
 
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    setRunning(false);
                 }
-
-                setRunning(false);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
         runThread.start();
@@ -383,7 +457,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         }
     }
 
-    private List<Integer> getJavaPIDsWindows()  {
+    private List<Integer> getJavaPIDsWindows() {
         List<Integer> pids = new ArrayList<>();
         try {
             Process process = Runtime.getRuntime().exec("tasklist /FI \"IMAGENAME eq java.exe\" /NH");
@@ -405,7 +479,7 @@ public final class Configuration implements BotParameter, Copyable<Configuration
         return pids;
     }
 
-    private List<Integer> getJavaPIDsLinux()  {
+    private List<Integer> getJavaPIDsLinux() {
         List<Integer> pids = new ArrayList<>();
         try {
             Process process = Runtime.getRuntime().exec("ps aux | grep java");
