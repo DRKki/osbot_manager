@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Optional;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -48,20 +49,17 @@ public final class LocalScriptLoader {
             JarEntry entry = (JarEntry) entries.nextElement();
             String name = entry.getName();
             if (name.endsWith(".class")) {
-                Script script = getScriptFromClass(classLoader, name);
-                if(script != null) {
-                    localScripts.add(script);
-                }
+                getScriptFromClass(classLoader, name).ifPresent(localScripts::add);
             }
         }
     }
 
-    private Script getScriptFromClass(final ClassLoader classLoader, final String className) throws ClassNotFoundException {
+    private Optional<Script> getScriptFromClass(final ClassLoader classLoader, final String className) throws ClassNotFoundException {
         Class cls = classLoader.loadClass(className.replace('/', '.').replace(".class", ""));
         Annotation scriptManifest = cls.getAnnotation(ScriptManifest.class);
         if(scriptManifest != null) {
-            return new Script(((ScriptManifest) scriptManifest).name(), "", true);
+            return Optional.of(new Script(((ScriptManifest) scriptManifest).name(), "", true));
         }
-        return null;
+        return Optional.empty();
     }
 }

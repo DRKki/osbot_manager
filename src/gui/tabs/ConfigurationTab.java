@@ -9,8 +9,6 @@ import gui.ToolbarButton;
 import gui.dialogues.error_dialog.ExceptionDialog;
 import gui.dialogues.input_dialog.ConfigurationDialog;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.control.*;
@@ -22,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
