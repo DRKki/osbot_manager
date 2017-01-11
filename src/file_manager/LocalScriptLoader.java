@@ -34,8 +34,7 @@ public final class LocalScriptLoader {
                 URL url = file.toURI().toURL();
                 ClassLoader classLoader = new URLClassLoader(new URL[]{ url });
                 JarFile jarFile = new JarFile(file.getAbsolutePath());
-                Script script = getScriptFromJar(jarFile, classLoader);
-                if(script != null) localScripts.add(script);
+                addScriptsFromJar(jarFile, classLoader, localScripts);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,7 +42,7 @@ public final class LocalScriptLoader {
         return localScripts;
     }
 
-    private Script getScriptFromJar(final JarFile jarFile, final ClassLoader classLoader) throws ClassNotFoundException {
+    private void addScriptsFromJar(final JarFile jarFile, final ClassLoader classLoader, final List<Script> localScripts) throws ClassNotFoundException {
         Enumeration entries = jarFile.entries();
         while (entries.hasMoreElements()) {
             JarEntry entry = (JarEntry) entries.nextElement();
@@ -51,11 +50,10 @@ public final class LocalScriptLoader {
             if (name.endsWith(".class")) {
                 Script script = getScriptFromClass(classLoader, name);
                 if(script != null) {
-                    return script;
+                    localScripts.add(script);
                 }
             }
         }
-        return null;
     }
 
     private Script getScriptFromClass(final ClassLoader classLoader, final String className) throws ClassNotFoundException {
